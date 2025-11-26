@@ -1,0 +1,62 @@
+[
+  {
+    "userId": "mietxyjiak65svo1jds",
+    "items": [
+      {
+        "productId": "mietxyjkjo6rovj202p",
+        "quantity": 1,
+        "addedAt": "2025-11-25T17:42:59.756Z"
+      }
+    ],
+    "id": "miev6a3uv2m99qeo9xc",
+    "createdAt": "2025-11-25T17:42:59.754Z",
+    "updatedAt": "2025-11-25T17:42:59.758Z"
+  },
+  {
+    "userId": "mievkczf6vo11jothz",
+    "items": [],
+    "id": "mievkk0cbe1k7svwne",
+    "createdAt": "2025-11-25T17:54:05.772Z",
+    "updatedAt": "2025-11-25T18:14:46.988Z"
+  },
+  {
+    "userId": "miexad8v7tmq7nxov7q",
+    "items": [
+      {
+        "productId": "mietxyjk3nwpdvijezp",
+        "quantity": 1,
+        "addedAt": "2025-11-26T07:49:16.437Z"
+      }
+    ],
+    "id": "miexc1x5c9kkafc4rkp",
+    "createdAt": "2025-11-25T18:43:28.313Z",
+    "updatedAt": "2025-11-26T07:49:16.439Z"
+  },
+  {
+    "userId": "mifqj48250b9a64gujq",
+    "items": [],
+    "id": "mifqjagcvpmoa5ad7q",
+    "createdAt": "2025-11-26T08:20:54.828Z",
+    "updatedAt": "2025-11-26T08:40:46.250Z"
+  },
+  {
+    "userId": "mifs83qre5t19b4veb",
+    "items": [
+      {
+        "productId": "mietxyjkjo6rovj202p",
+        "quantity": 1,
+        "addedAt": "2025-11-26T09:08:29.628Z"
+      }
+    ],
+    "id": "mifs8h86b4so7ct5eks",
+    "createdAt": "2025-11-26T09:08:29.622Z",
+    "updatedAt": "2025-11-26T09:08:29.631Z"
+  },
+  {
+    "userId": "mifshzbs1z9bilk917w",
+    "items": [],
+    "id": "mifsi9ymyq1v9trvlo",
+    "createdAt": "2025-11-26T09:16:06.766Z",
+    "updatedAt": "2025-11-26T09:28:10.323Z"
+  }
+]

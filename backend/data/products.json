@@ -1,0 +1,35 @@
+[
+  {
+    "name": "ScentFix Green Tea",
+    "description": "Our classic shoe deodorant patch with fresh scent. Perfect for daily use and keeps your shoes smelling fresh all day long.",
+    "price": 29999,
+    "stock": 100,
+    "image": "/assets/products/scentfix-classic/main.jpg",
+    "folderName": "scentfix-classic",
+    "id": "mietxyjkjo6rovj202p",
+    "createdAt": "2025-11-25T17:08:31.904Z",
+    "updatedAt": "2025-11-25T17:52:08.879Z"
+  },
+  {
+    "name": "ScentFix Mint",
+    "description": "Extra strength formula designed for athletic shoes and active lifestyles. Long-lasting protection against odor.",
+    "price": 29999,
+    "stock": 75,
+    "image": "/assets/products/scentfix-sport/main.jpg",
+    "folderName": "scentfix-sport",
+    "id": "mietxyjk3nwpdvijezp",
+    "createdAt": "2025-11-25T17:08:31.904Z",
+    "updatedAt": "2025-11-26T09:28:10.312Z"
+  },
+  {
+    "name": "ScentFix Lemon",
+    "description": "Premium blend with essential oils for a luxurious scent experience. Our highest quality formula for discerning customers.",
+    "price": 29999,
+    "stock": 48,
+    "image": "/assets/products/scentfix-premium/main.jpg",
+    "folderName": "scentfix-premium",
+    "id": "mietxyjku7x4hz13or",
+    "createdAt": "2025-11-25T17:08:31.904Z",
+    "updatedAt": "2025-11-26T09:24:20.226Z"
+  }
+]

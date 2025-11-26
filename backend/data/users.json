@@ -1,0 +1,46 @@
+[
+  {
+    "name": "Derrick Tantra",
+    "email": "derricktantra@gmail.com",
+    "password": "$2b$10$Xx6qCY/XBoKu7jN.wRkdOeafjxEv6h00zo1cDsd/U8/OUEuS0tkSS",
+    "birthdate": "2005-06-07",
+    "gender": "male",
+    "phone": "08117000141",
+    "isAdmin": false,
+    "id": "mievkczf6vo11jothz",
+    "createdAt": "2025-11-25T17:53:56.667Z"
+  },
+  {
+    "name": "Owen",
+    "email": "owencsoe@gmail.com",
+    "password": "$2b$10$n6eBh7p2hB1SHEaIam//NuntkQtsXmEAydZf9yFnTdl2q9E0V6Gum",
+    "birthdate": "2025-11-27",
+    "gender": "male",
+    "phone": "081807973333",
+    "isAdmin": false,
+    "id": "miexad8v7tmq7nxov7q",
+    "createdAt": "2025-11-25T18:42:09.679Z"
+  },
+  {
+    "name": "Stevano fernandy",
+    "email": "lele@gmail.cam",
+    "password": "$2b$10$wWoRJzDKsqQZQaeG6sQUEewAzPhJYi1M15CpqeMjUgE.0EQnkRrhW",
+    "birthdate": "2025-10-27",
+    "gender": "male",
+    "phone": "087733443435",
+    "isAdmin": false,
+    "id": "mifqj48250b9a64gujq",
+    "createdAt": "2025-11-26T08:20:46.754Z"
+  },
+  {
+    "name": "steven",
+    "email": "steven@gmail.cam",
+    "password": "$2b$10$hyh/qa44RfMYTKHJT1/EoOn2QpqeZLKwiWEqWEMadJxzm.57UrpzK",
+    "birthdate": "2025-11-17",
+    "gender": "male",
+    "phone": "082249419509",
+    "isAdmin": false,
+    "id": "mifshzbs1z9bilk917w",
+    "createdAt": "2025-11-26T09:15:52.984Z"
+  }
+]
