@@ -257,6 +257,35 @@ export default function CheckoutPage() {
           .payment-info strong {
             color: #1e40af;
           }
+
+          @media (max-width: 768px) {
+            .checkout-page {
+              padding: var(--spacing-xl) var(--spacing-md);
+            }
+
+            .page-title {
+              font-size: 1.75rem;
+            }
+          }
+
+          @media (max-width: 480px) {
+            .checkout-actions {
+              flex-direction: column;
+            }
+
+            .checkout-actions .btn {
+              width: 100%;
+              min-height: 48px;
+            }
+
+            .page-title {
+              font-size: 1.5rem;
+            }
+
+            .checkout-section {
+              padding: var(--spacing-md);
+            }
+          }
         `}</style>
 
                 <h1 className="page-title">Checkout</h1>

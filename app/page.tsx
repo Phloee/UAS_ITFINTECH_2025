@@ -141,26 +141,63 @@ export default function Home() {
           
           .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: var(--spacing-xl);
             max-width: 1200px;
             margin: 0 auto;
           }
           
           .feature-card {
+            position: relative;
             text-align: center;
-            padding: var(--spacing-xl);
+            padding: var(--spacing-3xl) var(--spacing-xl);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            background-size: cover;
+            background-position: center;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+          }
+
+          .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+          }
+
+          .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+            z-index: 1;
           }
           
-          .feature-icon {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-md);
+          .feature-card > * {
+            position: relative;
+            z-index: 2;
+            color: white;
           }
           
           .feature-title {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.5rem;
+            font-weight: 700;
             margin-bottom: var(--spacing-sm);
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+          }
+
+          .feature-card p {
+            color: rgba(255,255,255,0.95);
+            font-size: 1rem;
+            line-height: 1.6;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
           }
           
           @media (max-width: 768px) {
@@ -174,6 +211,10 @@ export default function Home() {
             
             .products-grid {
               grid-template-columns: 1fr;
+            }
+
+            .feature-card {
+              min-height: 250px;
             }
           }
         `}</style>
@@ -192,18 +233,15 @@ export default function Home() {
         <section className="features">
           <h2 className="section-title">Why Choose ScentFix?</h2>
           <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon">🌿</div>
+            <div className="feature-card" style={{ backgroundImage: 'url(/assets/features/natural.jpg)' }}>
               <h3 className="feature-title">Natural Ingredients</h3>
               <p>Made with natural, eco-friendly materials that are safe for you and the environment.</p>
             </div>
-            <div className="feature-card">
-              <div className="feature-icon">⏰</div>
+            <div className="feature-card" style={{ backgroundImage: 'url(/assets/features/clock.jpg)' }}>
               <h3 className="feature-title">Long-Lasting</h3>
               <p>Each patch provides all-day protection against unpleasant odors.</p>
             </div>
-            <div className="feature-card">
-              <div className="feature-icon">✨</div>
+            <div className="feature-card" style={{ backgroundImage: 'url(/assets/features/shoes.jpg)' }}>
               <h3 className="feature-title">Easy to Use</h3>
               <p>Simply peel and stick inside your shoes for instant freshness.</p>
             </div>

@@ -251,12 +251,14 @@
     ],
     "totalAmount": 29999,
     "shippingAddress": "",
-    "status": "pending",
-    "paymentStatus": "pending",
+    "status": "cancelled",
+    "paymentStatus": "failed",
     "id": "mifozcv8x7k6xy0bkil",
     "createdAt": "2025-11-26T07:37:25.220Z",
     "paymentToken": "53be637f-1ecf-4498-a20d-a0d7fe3ae9cd",
-    "updatedAt": "2025-11-26T07:37:27.508Z"
+    "updatedAt": "2025-11-26T11:39:16.168Z",
+    "transactionStatus": "expire",
+    "fraudStatus": "accept"
   },
   {
     "userId": "miexad8v7tmq7nxov7q",
@@ -279,12 +281,14 @@
     ],
     "totalAmount": 59998,
     "shippingAddress": "",
-    "status": "pending",
-    "paymentStatus": "pending",
+    "status": "being processed",
+    "paymentStatus": "paid",
     "id": "mifp17b4kue1tej0bv",
     "createdAt": "2025-11-26T07:38:51.328Z",
     "paymentToken": "9935c7a9-e750-4f60-bbcb-3fda90e08e94",
-    "updatedAt": "2025-11-26T07:48:38.591Z"
+    "updatedAt": "2025-11-26T11:39:13.279Z",
+    "transactionStatus": "capture",
+    "fraudStatus": "accept"
   },
   {
     "userId": "miexad8v7tmq7nxov7q",
@@ -300,12 +304,14 @@
     ],
     "totalAmount": 29999,
     "shippingAddress": "",
-    "status": "pending",
-    "paymentStatus": "pending",
+    "status": "being processed",
+    "paymentStatus": "paid",
     "id": "mifpep5vrrx13a5rcy",
     "createdAt": "2025-11-26T07:49:20.995Z",
     "paymentToken": "ba176c3c-9db3-4d3b-b03f-4a480556cdc3",
-    "updatedAt": "2025-11-26T07:49:22.944Z"
+    "updatedAt": "2025-11-26T11:39:09.083Z",
+    "transactionStatus": "capture",
+    "fraudStatus": "accept"
   },
   {
     "userId": "mifqj48250b9a64gujq",
@@ -344,12 +350,12 @@
     ],
     "totalAmount": 299990,
     "shippingAddress": "",
-    "status": "being processed",
+    "status": "shipped",
     "paymentStatus": "paid",
     "id": "mifr88jh6ya9r5xyvly",
     "createdAt": "2025-11-26T08:40:18.749Z",
     "paymentToken": "d6de15dd-f8a5-49f3-b289-130b5869fa9b",
-    "updatedAt": "2025-11-26T08:40:46.258Z",
+    "updatedAt": "2025-11-26T12:04:08.562Z",
     "transactionStatus": "capture",
     "fraudStatus": "accept"
   },
@@ -419,6 +425,59 @@
     "createdAt": "2025-11-26T09:27:46.511Z",
     "paymentToken": "821940ef-0f01-4384-90db-0773a8c7645f",
     "updatedAt": "2025-11-26T09:29:37.721Z",
+    "transactionStatus": "capture",
+    "fraudStatus": "accept"
+  },
+  {
+    "userId": "miexad8v7tmq7nxov7q",
+    "orderNumber": "SF-1764157193871",
+    "items": [
+      {
+        "productId": "mietxyjk3nwpdvijezp",
+        "name": "ScentFix Mint",
+        "price": 30000,
+        "quantity": 1,
+        "image": "/assets/products/scentfix-sport/main.jpg"
+      }
+    ],
+    "totalAmount": 30000,
+    "shippingAddress": "",
+    "status": "delivered",
+    "paymentStatus": "paid",
+    "id": "mifxn6ofik7tr0l5r4b",
+    "createdAt": "2025-11-26T11:39:53.871Z",
+    "paymentToken": "bd890f7f-8979-42be-8236-0c56eea0f2a9",
+    "updatedAt": "2025-11-26T11:43:04.198Z",
+    "transactionStatus": "capture",
+    "fraudStatus": "accept"
+  },
+  {
+    "userId": "miexad8v7tmq7nxov7q",
+    "orderNumber": "SF-1764157271405",
+    "items": [
+      {
+        "productId": "mietxyjk3nwpdvijezp",
+        "name": "ScentFix Mint",
+        "price": 30000,
+        "quantity": 1,
+        "image": "/assets/products/scentfix-sport/main.jpg"
+      },
+      {
+        "productId": "mietxyjkjo6rovj202p",
+        "name": "ScentFix Green Tea",
+        "price": 30000,
+        "quantity": 1,
+        "image": "/assets/products/scentfix-classic/main.jpg"
+      }
+    ],
+    "totalAmount": 60000,
+    "shippingAddress": "",
+    "status": "delivered",
+    "paymentStatus": "paid",
+    "id": "mifxoui5yo5t1i963l",
+    "createdAt": "2025-11-26T11:41:11.405Z",
+    "paymentToken": "ba2d96cb-a1e6-4dab-9154-ce0f10cf6487",
+    "updatedAt": "2025-11-26T11:43:00.002Z",
     "transactionStatus": "capture",
     "fraudStatus": "accept"
   }

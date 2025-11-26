@@ -295,6 +295,16 @@ export default function CartPage() {
           }
           
           @media (max-width: 768px) {
+            .cart-page {
+              padding: var(--spacing-xl) var(--spacing-md);
+            }
+
+            .page-header {
+              flex-direction: column;
+              align-items: flex-start;
+              gap: var(--spacing-md);
+            }
+
             .cart-item {
               grid-template-columns: 80px 1fr;
               gap: var(--spacing-md);
@@ -309,6 +319,34 @@ export default function CartPage() {
               grid-column: 1 / -1;
               flex-direction: row;
               justify-content: space-between;
+            }
+          }
+
+          @media (max-width: 480px) {
+            .checkout-actions {
+              flex-direction: column;
+            }
+
+            .checkout-actions .btn {
+              width: 100% !important;
+              min-height: 48px;
+            }
+
+            .page-title {
+              font-size: 1.75rem;
+            }
+
+            .modal-content {
+              padding: var(--spacing-md);
+            }
+
+            .cart-item {
+              grid-template-columns: 60px 1fr;
+            }
+
+            .item-image {
+              width: 60px;
+              height: 60px;
             }
           }
         `}</style>

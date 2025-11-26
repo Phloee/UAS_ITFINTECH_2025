@@ -332,6 +332,17 @@ export default function OrderDetailPage() {
           }
           
           @media (max-width: 768px) {
+            .page-header > div {
+              flex-direction: column !important;
+              align-items: flex-start !important;
+              gap: var(--spacing-lg);
+            }
+
+            .page-header > div > div:last-child {
+              text-align: left !important;
+              width: 100%;
+            }
+
             .tracker-steps {
               flex-wrap: wrap;
             }
@@ -343,6 +354,29 @@ export default function OrderDetailPage() {
             
             .step-label {
               font-size: 0.75rem;
+            }
+
+            .order-detail-page {
+              padding: var(--spacing-xl) var(--spacing-md);
+            }
+
+            .order-number {
+              font-size: 1.5rem;
+            }
+          }
+
+          @media (max-width: 480px) {
+            .order-number {
+              font-size: 1.25rem;
+            }
+
+            .item-image {
+              width: 60px !important;
+              height: 60px !important;
+            }
+
+            .back-link {
+              font-size: 0.875rem;
             }
           }
         `}</style>

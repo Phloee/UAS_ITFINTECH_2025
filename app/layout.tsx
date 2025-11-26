@@ -2,6 +2,7 @@
 import { Toaster } from 'react-hot-toast';
 import './globals.css';
 import { AuthProvider } from './contexts/AuthContext';
+import FloatingCart from './components/FloatingCart';
 
 export const metadata = {
     title: 'ScentFix - Premium Shoe Deodorant Patches',
@@ -15,6 +16,7 @@ export default function RootLayout({ children }) {
             <body>
                 <AuthProvider>
                     {children}
+                    <FloatingCart />
                     <Toaster
                         position="top-right"
                         toastOptions={{
