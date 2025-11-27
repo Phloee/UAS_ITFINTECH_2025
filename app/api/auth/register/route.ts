@@ -1,7 +1,5 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
-// @ts-nocheck
-import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/backend/models/User';
 import bcrypt from 'bcryptjs';
