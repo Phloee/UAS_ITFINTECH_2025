@@ -1,5 +1,7 @@
 // @ts-nocheck
 import { NextRequest, NextResponse } from 'next/server';
+// @ts-nocheck
+import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/backend/models/User';
 import bcrypt from 'bcryptjs';
@@ -35,6 +37,19 @@ export async function POST(request: NextRequest) {
             phone,
             isAdmin: false
         });
+
+        // Send welcome WhatsApp message
+        try {
+            const whatsappService = require('@/backend/utils/whatsapp');
+            await whatsappService.sendWelcomeMessage({
+                phone: user.phone,
+                name: user.name
+            });
+            console.log('📱 WhatsApp welcome message sent to:', user.phone);
+        } catch (err: any) {
+            console.error('❌ WhatsApp error:', err.message);
+            // Don't fail registration if WhatsApp fails
+        }
 
         // Generate JWT token
         const token = jwt.sign(
