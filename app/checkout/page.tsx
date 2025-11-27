@@ -54,7 +54,11 @@ export default function CheckoutPage() {
         return;
       }
       const items = response.data.items || [];
-      const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      // Calculate total using populated product data
+      const totalAmount = items.reduce((sum, item) => {
+        const price = item.productId?.price || 0;
+        return sum + (price * item.quantity);
+      }, 0);
       setCart({ items, totalAmount });
     } catch (error) {
       toast.error('Failed to fetch cart');
@@ -295,17 +299,25 @@ export default function CheckoutPage() {
         <div className="checkout-section">
           <h2 className="section-title">Order Summary</h2>
 
-          {cart.items.map((item) => (
-            <div key={item.productId} className="order-item">
-              <div className="item-info">
-                <div className="item-name">{item.name}</div>
-                <div className="item-quantity">Quantity: {item.quantity}</div>
+          {cart.items.map((item) => {
+            // Access populated product data safely
+            const product = item.productId || {};
+            const price = product.price || 0;
+            const name = product.name || 'Unknown Product';
+            const productId = product._id || item._id;
+
+            return (
+              <div key={productId} className="order-item">
+                <div className="item-info">
+                  <div className="item-name">{name}</div>
+                  <div className="item-quantity">Quantity: {item.quantity}</div>
+                </div>
+                <div className="item-price">
+                  Rp {(price * item.quantity).toLocaleString('id-ID')}
+                </div>
               </div>
-              <div className="item-price">
-                Rp {((item.price || 0) * item.quantity).toLocaleString('id-ID')}
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
           <div className="order-summary">
             <div className="summary-row">
