@@ -51,12 +51,35 @@ export async function POST(request: NextRequest) {
                     const user = await User.findById(order.userId);
                     if (user) {
                         try {
-                            const whatsappService = require('@/backend/utils/whatsapp');
+                            // Inline WhatsApp logic to avoid require issues
+                            const axios = require('axios');
                             const updatedOrderObj = order.toObject();
                             updatedOrderObj.status = newStatus;
                             updatedOrderObj.paymentStatus = paymentStatus;
 
-                            await whatsappService.sendOrderConfirmation(user, updatedOrderObj);
+                            const message = `
+*Payment Confirmed!* ✅
+
+Hello ${user.name},
+Your payment for order *${updatedOrderObj.orderNumber}* has been confirmed.
+
+*Order Details:*
+Total Amount: Rp ${updatedOrderObj.totalAmount.toLocaleString('id-ID')}
+Status: ${newStatus}
+
+We are processing your order now. You will receive another update when it ships.
+
+Thank you for shopping with ScentFix!
+                            `.trim();
+
+                            await axios.post('https://api.fonnte.com/send', {
+                                target: user.phone,
+                                message: message,
+                            }, {
+                                headers: {
+                                    'Authorization': process.env.FONNTE_TOKEN
+                                }
+                            });
                             console.log('📱 Payment confirmation sent to:', user.phone);
                         } catch (err) {
                             console.error('WhatsApp notification error:', err);
