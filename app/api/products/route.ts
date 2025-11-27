@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
         // Note: File upload to local filesystem doesn't work on Vercel
         // We'll use a placeholder or the folder-based path if provided
-        let image = '/assets/products/placeholder.jpg';
+        let image = '/assets/products/default-product.jpg';
         if (folderName) {
             image = `/assets/products/${folderName}/${folderName}.png`;
         }

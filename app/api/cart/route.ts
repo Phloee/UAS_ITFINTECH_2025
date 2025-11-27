@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
                 if (!item.productId) return false;
 
                 // Fix missing or invalid image paths
-                if (!item.productId.image || item.productId.image === '/assets/products/placeholder.jpg') {
+                if (!item.productId.image || item.productId.image === '/assets/products/placeholder.jpg' || item.productId.image === '/assets/products/default-product.jpg') {
                     // Use default product image based on folder name or fallback
                     if (item.productId.folderName) {
                         item.productId.image = `/assets/products/${item.productId.folderName}/${item.productId.folderName}.png`;

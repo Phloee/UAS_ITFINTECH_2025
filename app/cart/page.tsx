@@ -386,7 +386,7 @@ export default function CartPage() {
                 const product = item.productId || {};
                 const price = product.price || 0;
                 const name = product.name || 'Unknown Product';
-                const image = product.image || '/assets/products/placeholder.jpg';
+                const image = product.image || '/assets/products/default-product.jpg';
                 const productId = product._id || item._id; // Fallback to item ID if product ID missing
 
                 return (
