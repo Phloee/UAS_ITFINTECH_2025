@@ -16,9 +16,25 @@ export async function GET(request: NextRequest) {
             cart = await Cart.create({ userId: user.id, items: [] });
         }
 
-        // Filter out items with null productId (deleted products)
+        // Filter out items with null productId (deleted products) and fix image paths
         if (cart.items) {
-            cart.items = cart.items.filter(item => item.productId != null);
+            cart.items = cart.items.filter(item => {
+                if (!item.productId) return false;
+
+                // Fix missing or invalid image paths
+                if (!item.productId.image || item.productId.image === '/assets/products/placeholder.jpg') {
+                    // Use default product image based on folder name or fallback
+                    if (item.productId.folderName) {
+                        item.productId.image = `/assets/products/${item.productId.folderName}/${item.productId.folderName}.png`;
+                    } else {
+                        // Set to null to handle on frontend
+                        item.productId.image = null;
+                    }
+                }
+
+                return true;
+            });
+
             if (cart.isModified('items')) {
                 await cart.save();
             }

@@ -4,6 +4,33 @@ import connectDB from '@/lib/mongodb';
 import User from '@/backend/models/User';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import axios from 'axios';
+
+async function sendWhatsAppWelcome(phone: string, name: string) {
+    try {
+        const FONNTE_TOKEN = process.env.FONNTE_TOKEN;
+        if (!FONNTE_TOKEN) {
+            console.warn('FONNTE_TOKEN not configured');
+            return;
+        }
+
+        const message = `Selamat datang ${name} di ScentFix! 🎉\n\nTerima kasih sudah mendaftar. Nikmati pengalaman berbelanja produk deodoran sepatu terbaik kami.`;
+
+        await axios.post('https://api.fonnte.com/send', {
+            target: phone,
+            message: message,
+            countryCode: '62'
+        }, {
+            headers: {
+                'Authorization': FONNTE_TOKEN
+            }
+        });
+
+        console.log('📱 WhatsApp sent to:', phone);
+    } catch (error) {
+        console.error('WhatsApp error:', error);
+    }
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -37,17 +64,7 @@ export async function POST(request: NextRequest) {
         });
 
         // Send welcome WhatsApp message
-        try {
-            const whatsappService = require('@/backend/utils/whatsapp');
-            await whatsappService.sendWelcomeMessage({
-                phone: user.phone,
-                name: user.name
-            });
-            console.log('📱 WhatsApp welcome message sent to:', user.phone);
-        } catch (err: any) {
-            console.error('❌ WhatsApp error:', err.message);
-            // Don't fail registration if WhatsApp fails
-        }
+        await sendWhatsAppWelcome(user.phone, user.name);
 
         // Generate JWT token
         const token = jwt.sign(

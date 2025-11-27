@@ -29,43 +29,57 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        requireAdmin(request);
+        // Check admin auth first
+        const user = requireAdmin(request);
+        console.log('Admin authenticated:', user.id);
+
         await connectDB();
 
         const { id } = await params;
-        const { name, description, price, stock } = await request.json();
+        const body = await request.json();
+        console.log('Update request for product:', id, body);
+
+        const { name, description, price, stock } = body;
 
         const product = await Product.findById(id);
         if (!product) {
             return NextResponse.json({ error: 'Product not found' }, { status: 404 });
         }
 
-        const updates = {
-            name: name || product.name,
-            description: description || product.description,
-            price: price !== undefined ? parseFloat(price) : product.price,
-            stock: stock !== undefined ? parseInt(stock) : product.stock
-        };
+        // Build updates object
+        const updates: any = {};
+        if (name !== undefined) updates.name = name;
+        if (description !== undefined) updates.description = description;
+        if (price !== undefined) updates.price = parseFloat(price);
+        if (stock !== undefined) updates.stock = parseInt(stock);
+
+        console.log('Applying updates:', updates);
 
         const updatedProduct = await Product.findByIdAndUpdate(
             id,
             updates,
-            { new: true }
+            { new: true, runValidators: true }
         );
 
+        console.log('Product updated successfully');
         return NextResponse.json({
             message: 'Product updated successfully',
             product: updatedProduct
         });
-    } catch (error) {
+    } catch (error: any) {
+        console.error('Update product error:', error);
+
         if (error.message === 'Unauthorized') {
             return unauthorizedResponse();
         }
         if (error.message === 'Admin access required') {
             return forbiddenResponse();
         }
-        console.error('Update product error:', error);
-        return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
+
+        return NextResponse.json({
+            error: 'Failed to update product',
+            details: error.message
+        }, { status: 500 });
     }
 }
 
