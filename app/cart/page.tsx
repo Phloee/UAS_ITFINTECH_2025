@@ -31,7 +31,11 @@ export default function CartPage() {
       const response = await cartAPI.get();
       console.log('Cart response:', response.data);
       const items = response.data.items || [];
-      const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      // Calculate total using populated product data
+      const totalAmount = items.reduce((sum, item) => {
+        const price = item.productId?.price || 0;
+        return sum + (price * item.quantity);
+      }, 0);
       setCart({ items, totalAmount });
     } catch (error) {
       console.error('Failed to fetch cart', error);
@@ -377,54 +381,63 @@ export default function CartPage() {
         ) : (
           <>
             <div className="cart-items">
-              {cart.items.map((item) => (
-                <div key={item.productId} className="cart-item">
-                  <div className="item-image">
-                    <Image
-                      src={item.image || '/assets/products/placeholder.jpg'}
-                      alt={item.name || 'Product Image'}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                    />
-                  </div>
+              {cart.items.map((item) => {
+                // Access populated product data safely
+                const product = item.productId || {};
+                const price = product.price || 0;
+                const name = product.name || 'Unknown Product';
+                const image = product.image || '/assets/products/placeholder.jpg';
+                const productId = product._id || item._id; // Fallback to item ID if product ID missing
 
-                  <div className="item-details">
-                    <div className="item-name">{item.name || 'Unknown Product'}</div>
-                    <div className="item-price">
-                      Rp {(item.price || 0).toLocaleString('id-ID')} each
+                return (
+                  <div key={productId} className="cart-item">
+                    <div className="item-image">
+                      <Image
+                        src={image}
+                        alt={name}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
                     </div>
-                  </div>
 
-                  <div className="item-actions">
-                    <div className="quantity-controls">
+                    <div className="item-details">
+                      <div className="item-name">{name}</div>
+                      <div className="item-price">
+                        Rp {price.toLocaleString('id-ID')} each
+                      </div>
+                    </div>
+
+                    <div className="item-actions">
+                      <div className="quantity-controls">
+                        <button
+                          className="quantity-btn"
+                          onClick={() => updateQuantity(productId, item.quantity - 1)}
+                        >
+                          −
+                        </button>
+                        <span className="quantity-display">{item.quantity}</span>
+                        <button
+                          className="quantity-btn"
+                          onClick={() => updateQuantity(productId, item.quantity + 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      <div className="item-total">
+                        Rp {(price * item.quantity).toLocaleString('id-ID')}
+                      </div>
+
                       <button
-                        className="quantity-btn"
-                        onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                        className="remove-btn"
+                        onClick={() => removeItem(productId)}
                       >
-                        −
-                      </button>
-                      <span className="quantity-display">{item.quantity}</span>
-                      <button
-                        className="quantity-btn"
-                        onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                      >
-                        +
+                        Remove
                       </button>
                     </div>
-
-                    <div className="item-total">
-                      Rp {((item.price || 0) * item.quantity).toLocaleString('id-ID')}
-                    </div>
-
-                    <button
-                      className="remove-btn"
-                      onClick={() => removeItem(item.productId)}
-                    >
-                      Remove
-                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="cart-summary">
