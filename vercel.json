@@ -1,0 +1,13 @@
+{
+    "buildCommand": "npm run build",
+    "installCommand": "npm install",
+    "env": {
+        "MONGODB_URI": "@mongodb_uri",
+        "JWT_SECRET": "@jwt_secret",
+        "MIDTRANS_SERVER_KEY": "@midtrans_server_key",
+        "MIDTRANS_CLIENT_KEY": "@midtrans_client_key",
+        "NEXT_PUBLIC_MIDTRANS_CLIENT_KEY": "@midtrans_client_key",
+        "MIDTRANS_IS_PRODUCTION": "false",
+        "FONNTE_TOKEN": "@fonnte_token"
+    }
+}

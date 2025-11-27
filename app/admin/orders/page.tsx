@@ -260,7 +260,7 @@ export default function AdminOrdersPage() {
                         </div>
 
                         {filteredOrders.map((order) => (
-                            <div key={order.id} className="table-row">
+                            <div key={order._id} className="table-row">
                                 <div className="order-number">{order.orderNumber}</div>
                                 <div className="customer-name">
                                     {order.customerName || 'Customer'}
@@ -286,7 +286,7 @@ export default function AdminOrdersPage() {
                                     <select
                                         className="status-select"
                                         value={order.status}
-                                        onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                        onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                                         style={{
                                             borderColor: getStatusColor(order.status),
                                             color: getStatusColor(order.status)

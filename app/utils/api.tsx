@@ -1,7 +1,10 @@
 // @ts-nocheck
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+// Use Next.js API routes in production, Express backend in development
+const API_URL = typeof window !== 'undefined' && process.env.NODE_ENV === 'production'
+    ? '/api'  // Production: Next.js API routes (same domain)
+    : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'; // Development: Express backend
 
 // Create axios instance
 const api = axios.create({
