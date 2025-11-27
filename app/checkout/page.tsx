@@ -32,8 +32,9 @@ export default function CheckoutPage() {
       }
     }, 3000);
 
-    // Debug client key
+    // Debug client key and production mode
     console.log('Midtrans Client Key:', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY ? 'Present' : 'Missing');
+    console.log('Production Mode:', process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION);
 
     if (!user || user.isAdmin) {
       toast.error('Please login to checkout');

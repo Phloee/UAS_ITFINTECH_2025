@@ -77,7 +77,8 @@ class MidtransService {
             console.error('Message:', error.message);
             console.error('Server Key configured:', !!this.serverKey);
             console.error('Snap URL:', this.snapUrl);
-            throw new Error('Failed to create payment transaction');
+            const errorMessage = error.response?.data?.error_messages?.join(', ') || error.message;
+            throw new Error(`Midtrans Error: ${errorMessage}`);
         }
     }
 
