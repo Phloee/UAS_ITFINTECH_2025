@@ -5,15 +5,9 @@ class MidtransService {
         // Trim keys to remove any accidental whitespace
         this.serverKey = process.env.MIDTRANS_SERVER_KEY ? process.env.MIDTRANS_SERVER_KEY.trim() : '';
         this.clientKey = process.env.MIDTRANS_CLIENT_KEY ? process.env.MIDTRANS_CLIENT_KEY.trim() : '';
-        this.isProduction = process.env.MIDTRANS_IS_PRODUCTION === 'true';
-
-        // Debug logging
-        console.log('--- MIDTRANS CONFIGURATION ---');
-        console.log(`Server Key Length: ${this.serverKey.length}`);
-        console.log(`Server Key (masked): ${this.serverKey.substring(0, 5)}...${this.serverKey.substring(this.serverKey.length - 5)}`);
-        console.log(`Client Key Length: ${this.clientKey.length}`);
-        console.log(`Is Production: ${this.isProduction}`);
-        console.log('------------------------------');
+        // Robust check for production mode (handle spaces, case sensitivity)
+        const isProdEnv = String(process.env.MIDTRANS_IS_PRODUCTION || '').trim().toLowerCase();
+        this.isProduction = isProdEnv === 'true';
 
         // Snap API URL
         this.snapUrl = this.isProduction
@@ -24,6 +18,14 @@ class MidtransService {
         this.apiUrl = this.isProduction
             ? 'https://api.midtrans.com/v2'
             : 'https://api.sandbox.midtrans.com/v2';
+
+        // Safe logging for debugging
+        console.log('Midtrans Config Init:', {
+            isProduction: this.isProduction,
+            rawEnv: process.env.MIDTRANS_IS_PRODUCTION,
+            url: this.snapUrl,
+            serverKeyPrefix: this.serverKey ? this.serverKey.substring(0, 8) + '...' : 'MISSING'
+        });
     }
 
     async createTransaction(order, customer) {
