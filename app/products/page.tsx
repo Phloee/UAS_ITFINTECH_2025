@@ -96,7 +96,7 @@ export default function ProductsPage() {
                     <div className="products-grid">
                         {products.map((product) => (
                             <ProductCard
-                                key={product.id}
+                                key={product._id || product.id}
                                 product={product}
                                 onAddToCart={fetchProducts}
                             />

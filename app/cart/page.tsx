@@ -30,7 +30,9 @@ export default function CartPage() {
     try {
       const response = await cartAPI.get();
       console.log('Cart response:', response.data);
-      setCart(response.data || { items: [], totalAmount: 0 });
+      const items = response.data.items || [];
+      const totalAmount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      setCart({ items, totalAmount });
     } catch (error) {
       console.error('Failed to fetch cart', error);
     } finally {
@@ -379,17 +381,17 @@ export default function CartPage() {
                 <div key={item.productId} className="cart-item">
                   <div className="item-image">
                     <Image
-                      src={item.productImage || '/assets/products/placeholder.jpg'}
-                      alt={item.productName || 'Product Image'}
+                      src={item.image || '/assets/products/placeholder.jpg'}
+                      alt={item.name || 'Product Image'}
                       fill
                       style={{ objectFit: 'cover' }}
                     />
                   </div>
 
                   <div className="item-details">
-                    <div className="item-name">{item.productName || 'Unknown Product'}</div>
+                    <div className="item-name">{item.name || 'Unknown Product'}</div>
                     <div className="item-price">
-                      Rp {(item.productPrice || 0).toLocaleString('id-ID')} each
+                      Rp {(item.price || 0).toLocaleString('id-ID')} each
                     </div>
                   </div>
 
@@ -411,7 +413,7 @@ export default function CartPage() {
                     </div>
 
                     <div className="item-total">
-                      Rp {((item.productPrice || 0) * item.quantity).toLocaleString('id-ID')}
+                      Rp {((item.price || 0) * item.quantity).toLocaleString('id-ID')}
                     </div>
 
                     <button

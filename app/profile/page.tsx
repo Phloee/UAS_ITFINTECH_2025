@@ -9,49 +9,49 @@ import { orders as ordersAPI } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function ProfilePage() {
-    const { user, logout } = useAuth();
-    const router = useRouter();
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (!user || user.isAdmin) {
-            router.push('/auth/login');
-            return;
-        }
-        fetchOrders();
-    }, [user]);
+  useEffect(() => {
+    if (!user || user.isAdmin) {
+      router.push('/auth/login');
+      return;
+    }
+    fetchOrders();
+  }, [user]);
 
-    const fetchOrders = async () => {
-        try {
-            const response = await ordersAPI.getUserOrders();
-            setOrders(response.data);
-        } catch (error) {
-            console.error('Failed to fetch orders');
-        } finally {
-            setLoading(false);
-        }
+  const fetchOrders = async () => {
+    try {
+      const response = await ordersAPI.getUserOrders();
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Failed to fetch orders');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    const colors = {
+      'pending': '#f59e0b',
+      'being processed': '#3b82f6',
+      'shipped': '#8b5cf6',
+      'delivered': '#10b981',
+      'cancelled': '#ef4444'
     };
+    return colors[status] || '#6b7280';
+  };
 
-    const getStatusColor = (status: string) => {
-        const colors = {
-            'pending': '#f59e0b',
-            'being processed': '#3b82f6',
-            'shipped': '#8b5cf6',
-            'delivered': '#10b981',
-            'cancelled': '#ef4444'
-        };
-        return colors[status] || '#6b7280';
-    };
+  if (!user) return null;
 
-    if (!user) return null;
+  return (
+    <>
+      <Navbar />
 
-    return (
-        <>
-            <Navbar />
-
-            <main className="profile-page">
-                <style jsx>{`
+      <main className="profile-page">
+        <style jsx>{`
           .profile-page {
             max-width: 1000px;
             margin: 0 auto;
@@ -203,87 +203,87 @@ export default function ProfilePage() {
           }
         `}</style>
 
-                <h1 className="page-title">My Profile</h1>
+        <h1 className="page-title">My Profile</h1>
 
-                <div className="profile-grid">
-                    <div className="profile-card">
-                        <div className="profile-header">
-                            <div className="profile-avatar">
-                                {user.name?.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="profile-name">{user.name}</div>
-                            <div className="profile-email">{user.email}</div>
-                        </div>
+        <div className="profile-grid">
+          <div className="profile-card">
+            <div className="profile-header">
+              <div className="profile-avatar">
+                {user.name?.charAt(0).toUpperCase()}
+              </div>
+              <div className="profile-name">{user.name}</div>
+              <div className="profile-email">{user.email}</div>
+            </div>
 
-                        <div className="info-group">
-                            <div className="info-label">Phone Number</div>
-                            <div className="info-value">{user.phone || '-'}</div>
-                        </div>
+            <div className="info-group">
+              <div className="info-label">Phone Number</div>
+              <div className="info-value">{user.phone || '-'}</div>
+            </div>
 
-                        <div className="info-group">
-                            <div className="info-label">Gender</div>
-                            <div className="info-value">
-                                {user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : '-'}
-                            </div>
-                        </div>
+            <div className="info-group">
+              <div className="info-label">Gender</div>
+              <div className="info-value">
+                {user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : '-'}
+              </div>
+            </div>
 
-                        <div className="info-group">
-                            <div className="info-label">Birthdate</div>
-                            <div className="info-value">
-                                {user.birthdate ? new Date(user.birthdate).toLocaleDateString('id-ID') : '-'}
-                            </div>
-                        </div>
+            <div className="info-group">
+              <div className="info-label">Birthdate</div>
+              <div className="info-value">
+                {user.birthdate ? new Date(user.birthdate).toLocaleDateString('id-ID') : '-'}
+              </div>
+            </div>
 
-                        <button className="btn btn-outline logout-btn" onClick={logout}>
-                            Logout
-                        </button>
+            <button className="btn btn-outline logout-btn" onClick={logout}>
+              Logout
+            </button>
+          </div>
+
+          <div className="orders-section">
+            <h2 className="section-title">Order History</h2>
+
+            {loading ? (
+              <div style={{ textAlign: 'center', padding: '2rem' }}>
+                <div className="spinner" style={{ margin: '0 auto' }}></div>
+              </div>
+            ) : orders.length === 0 ? (
+              <div className="empty-orders">
+                <h3>No orders yet</h3>
+                <p>Start shopping to see your orders here!</p>
+              </div>
+            ) : (
+              orders.map((order) => (
+                <div
+                  key={order._id || order.id}
+                  className="order-card"
+                  onClick={() => router.push(`/orders/${order._id || order.id}`)}
+                >
+                  <div className="order-header">
+                    <div className="order-number">{order.orderNumber}</div>
+                    <div
+                      className="order-status"
+                      style={{ backgroundColor: getStatusColor(order.status) }}
+                    >
+                      {order.status}
                     </div>
-
-                    <div className="orders-section">
-                        <h2 className="section-title">Order History</h2>
-
-                        {loading ? (
-                            <div style={{ textAlign: 'center', padding: '2rem' }}>
-                                <div className="spinner" style={{ margin: '0 auto' }}></div>
-                            </div>
-                        ) : orders.length === 0 ? (
-                            <div className="empty-orders">
-                                <h3>No orders yet</h3>
-                                <p>Start shopping to see your orders here!</p>
-                            </div>
-                        ) : (
-                            orders.map((order) => (
-                                <div
-                                    key={order.id}
-                                    className="order-card"
-                                    onClick={() => router.push(`/orders/${order.id}`)}
-                                >
-                                    <div className="order-header">
-                                        <div className="order-number">{order.orderNumber}</div>
-                                        <div
-                                            className="order-status"
-                                            style={{ backgroundColor: getStatusColor(order.status) }}
-                                        >
-                                            {order.status}
-                                        </div>
-                                    </div>
-                                    <div className="order-details">
-                                        <div>
-                                            {order.items?.length || 0} item(s) • {' '}
-                                            {new Date(order.createdAt).toLocaleDateString('id-ID')}
-                                        </div>
-                                        <div className="order-total">
-                                            Rp {order.totalAmount?.toLocaleString('id-ID')}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
+                  </div>
+                  <div className="order-details">
+                    <div>
+                      {order.items?.length || 0} item(s) • {' '}
+                      {new Date(order.createdAt).toLocaleDateString('id-ID')}
                     </div>
+                    <div className="order-total">
+                      Rp {order.totalAmount?.toLocaleString('id-ID')}
+                    </div>
+                  </div>
                 </div>
-            </main>
+              ))
+            )}
+          </div>
+        </div>
+      </main>
 
-            <Footer />
-        </>
-    );
+      <Footer />
+    </>
+  );
 }

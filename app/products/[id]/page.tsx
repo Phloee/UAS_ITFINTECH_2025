@@ -45,7 +45,7 @@ export default function ProductDetailPage() {
     }
 
     try {
-      await cartAPI.add({ productId: product.id, quantity });
+      await cartAPI.add({ productId: product._id || product.id, quantity });
       toast.success(`Added ${quantity} item(s) to cart!`);
       router.push('/cart');
     } catch (error) {

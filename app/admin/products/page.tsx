@@ -59,7 +59,7 @@ export default function AdminProductsPage() {
             }
 
             if (editingProduct) {
-                await productsAPI.update(editingProduct.id, formPayload);
+                await productsAPI.update(editingProduct._id || editingProduct.id, formPayload);
                 toast.success('Product updated successfully');
             } else {
                 await productsAPI.create(formPayload);
@@ -286,7 +286,7 @@ export default function AdminProductsPage() {
                 ) : (
                     <div className="products-grid">
                         {products.map((product) => (
-                            <div key={product.id} className="product-row">
+                            <div key={product._id || product.id} className="product-row">
                                 <div className="product-image">
                                     <Image
                                         src={product.image || '/assets/products/placeholder.jpg'}
@@ -310,7 +310,7 @@ export default function AdminProductsPage() {
                                     </button>
                                     <button
                                         className="btn btn-outline btn-sm"
-                                        onClick={() => handleDelete(product.id)}
+                                        onClick={() => handleDelete(product._id || product.id)}
                                     >
                                         Delete
                                     </button>

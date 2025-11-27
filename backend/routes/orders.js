@@ -1,5 +1,8 @@
 const express = require('express');
-const db = require('../utils/db');
+const Order = require('../models/Order');
+const Cart = require('../models/Cart');
+const Product = require('../models/Product');
+const User = require('../models/User');
 const { authenticateToken, authenticateAdmin } = require('../middleware/auth');
 const paymentService = require('../utils/payment');
 const whatsappService = require('../utils/whatsapp');
@@ -12,37 +15,40 @@ router.post('/create', authenticateToken, async (req, res) => {
         const { shippingAddress } = req.body;
 
         // Get user's cart
-        const cart = await db.findOne('carts.json', { userId: req.user.id });
+        const cart = await Cart.findOne({ userId: req.user.id }).populate('items.productId');
 
         if (!cart || !cart.items || cart.items.length === 0) {
             return res.status(400).json({ error: 'Cart is empty' });
         }
 
         // Get user details
-        const user = await db.findById('users.json', req.user.id);
+        const user = await User.findById(req.user.id);
 
-        // Prepare order items with product details
-        const orderItems = await Promise.all(
-            cart.items.map(async (item) => {
-                const product = await db.findById('products.json', item.productId);
+        // Prepare order items with product details and check stock
+        const orderItems = [];
+        for (const item of cart.items) {
+            if (!item.productId) {
+                continue; // Skip items where product was deleted
+            }
 
-                if (!product) {
-                    throw new Error(`Product not found: ${item.productId}`);
-                }
+            const product = item.productId; // Populated product
 
-                if (product.stock < item.quantity) {
-                    throw new Error(`Insufficient stock for: ${product.name}`);
-                }
+            if (product.stock < item.quantity) {
+                return res.status(400).json({ error: `Insufficient stock for: ${product.name}` });
+            }
 
-                return {
-                    productId: product.id,
-                    name: product.name,
-                    price: product.price,
-                    quantity: item.quantity,
-                    image: product.image
-                };
-            })
-        );
+            orderItems.push({
+                productId: product._id,
+                name: product.name,
+                price: product.price,
+                quantity: item.quantity,
+                image: product.image
+            });
+        }
+
+        if (orderItems.length === 0) {
+            return res.status(400).json({ error: 'No valid items in cart' });
+        }
 
         // Calculate total
         const totalAmount = orderItems.reduce(
@@ -54,7 +60,7 @@ router.post('/create', authenticateToken, async (req, res) => {
         const orderNumber = 'SF-' + Date.now();
 
         // Create order
-        const order = await db.insert('orders.json', {
+        const order = await Order.create({
             userId: req.user.id,
             orderNumber,
             items: orderItems,
@@ -77,13 +83,13 @@ router.post('/create', authenticateToken, async (req, res) => {
 // Initiate payment for order
 router.post('/:id/payment', authenticateToken, async (req, res) => {
     try {
-        const order = await db.findById('orders.json', req.params.id);
+        const order = await Order.findById(req.params.id);
 
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        if (order.userId !== req.user.id) {
+        if (order.userId.toString() !== req.user.id) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 
@@ -92,15 +98,15 @@ router.post('/:id/payment', authenticateToken, async (req, res) => {
         }
 
         // Get user details
-        const user = await db.findById('users.json', req.user.id);
+        const user = await User.findById(req.user.id);
 
         // Create Midtrans transaction
+        // Note: paymentService needs to be compatible with Mongoose objects or plain objects
         const payment = await paymentService.createTransaction(order, user);
 
         // Update order with payment token
-        await db.update('orders.json', order.id, {
-            paymentToken: payment.token
-        });
+        order.paymentToken = payment.token;
+        await order.save();
 
         res.json({
             message: 'Payment initiated',
@@ -117,13 +123,13 @@ router.post('/:id/payment', authenticateToken, async (req, res) => {
 // Check payment status manually (for localhost development)
 router.get('/:id/status', authenticateToken, async (req, res) => {
     try {
-        const order = await db.findById('orders.json', req.params.id);
+        const order = await Order.findById(req.params.id);
 
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        if (order.userId !== req.user.id && !req.user.isAdmin) {
+        if (order.userId.toString() !== req.user.id && !req.user.isAdmin) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 
@@ -139,35 +145,37 @@ router.get('/:id/status', authenticateToken, async (req, res) => {
 
         let newStatus = order.status;
         let paymentStatus = order.paymentStatus;
+        let statusChanged = false;
 
         if (transactionStatus === 'capture' || transactionStatus === 'settlement') {
             if (fraudStatus === 'accept' || !fraudStatus) {
                 paymentStatus = 'paid';
                 newStatus = 'being processed';
+                statusChanged = true;
 
                 // Reduce product stock if not already done
                 if (order.paymentStatus !== 'paid') {
                     for (const item of order.items) {
-                        const product = await db.findById('products.json', item.productId);
+                        const product = await Product.findById(item.productId);
                         if (product) {
-                            await db.update('products.json', item.productId, {
-                                stock: product.stock - item.quantity
-                            });
+                            product.stock = Math.max(0, product.stock - item.quantity);
+                            await product.save();
                         }
                     }
 
                     // Clear user's cart
-                    const cart = await db.findOne('carts.json', { userId: order.userId });
-                    if (cart) {
-                        await db.update('carts.json', cart.id, { items: [] });
-                    }
+                    await Cart.findOneAndUpdate({ userId: order.userId }, { items: [] });
 
                     // Send order confirmation WhatsApp notification
-                    const user = await db.findById('users.json', order.userId);
+                    const user = await User.findById(order.userId);
                     if (user) {
                         try {
-                            const updatedOrder = { ...order, status: newStatus, paymentStatus };
-                            await whatsappService.sendOrderConfirmation(user, updatedOrder);
+                            // Create a plain object for the updated order to pass to service
+                            const updatedOrderObj = order.toObject();
+                            updatedOrderObj.status = newStatus;
+                            updatedOrderObj.paymentStatus = paymentStatus;
+
+                            await whatsappService.sendOrderConfirmation(user, updatedOrderObj);
                             console.log('📱 Order confirmation sent to:', user.phone);
                         } catch (err) {
                             console.error('WhatsApp order confirmation error:', err);
@@ -178,16 +186,16 @@ router.get('/:id/status', authenticateToken, async (req, res) => {
         } else if (transactionStatus === 'cancel' || transactionStatus === 'deny' || transactionStatus === 'expire') {
             paymentStatus = 'failed';
             newStatus = 'cancelled';
+            statusChanged = true;
         }
 
         // Update order if status changed
-        if (paymentStatus !== order.paymentStatus) {
-            await db.update('orders.json', order.id, {
-                status: newStatus,
-                paymentStatus,
-                transactionStatus,
-                fraudStatus: fraudStatus || null
-            });
+        if (statusChanged || paymentStatus !== order.paymentStatus) {
+            order.status = newStatus;
+            order.paymentStatus = paymentStatus;
+            order.transactionStatus = transactionStatus;
+            order.fraudStatus = fraudStatus || null;
+            await order.save();
         }
 
         res.json({ status: newStatus, paymentStatus });
@@ -211,8 +219,7 @@ router.post('/notification', async (req, res) => {
         const fraudStatus = notification.fraud_status;
 
         // Find order by order number
-        const orders = await db.findAll('orders.json');
-        const order = orders.find(o => o.orderNumber === orderId);
+        const order = await Order.findOne({ orderNumber: orderId });
 
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
@@ -221,52 +228,58 @@ router.post('/notification', async (req, res) => {
         // Update order status based on transaction status
         let newStatus = order.status;
         let paymentStatus = order.paymentStatus;
+        let statusChanged = false;
 
         if (transactionStatus === 'capture' || transactionStatus === 'settlement') {
             if (fraudStatus === 'accept' || !fraudStatus) {
-                paymentStatus = 'paid';
-                newStatus = 'being processed';
+                // Only process if not already paid to avoid double processing
+                if (paymentStatus !== 'paid') {
+                    paymentStatus = 'paid';
+                    newStatus = 'being processed';
+                    statusChanged = true;
 
-                // Reduce product stock
-                for (const item of order.items) {
-                    const product = await db.findById('products.json', item.productId);
-                    if (product) {
-                        await db.update('products.json', item.productId, {
-                            stock: product.stock - item.quantity
-                        });
+                    // Reduce product stock
+                    for (const item of order.items) {
+                        const product = await Product.findById(item.productId);
+                        if (product) {
+                            product.stock = Math.max(0, product.stock - item.quantity);
+                            await product.save();
+                        }
                     }
-                }
 
-                // Clear user's cart
-                const cart = await db.findOne('carts.json', { userId: order.userId });
-                if (cart) {
-                    await db.update('carts.json', cart.id, { items: [] });
-                }
+                    // Clear user's cart
+                    await Cart.findOneAndUpdate({ userId: order.userId }, { items: [] });
 
-                // Send WhatsApp confirmation
-                const user = await db.findById('users.json', order.userId);
-                if (user) {
-                    try {
-                        await whatsappService.sendOrderConfirmation(user, order);
-                    } catch (err) {
-                        console.error('WhatsApp notification error:', err);
+                    // Send WhatsApp confirmation
+                    const user = await User.findById(order.userId);
+                    if (user) {
+                        try {
+                            const updatedOrderObj = order.toObject();
+                            updatedOrderObj.status = newStatus;
+                            updatedOrderObj.paymentStatus = paymentStatus;
+
+                            await whatsappService.sendOrderConfirmation(user, updatedOrderObj);
+                        } catch (err) {
+                            console.error('WhatsApp notification error:', err);
+                        }
                     }
                 }
             }
         } else if (transactionStatus === 'pending') {
-            paymentStatus = 'pending';
-            newStatus = 'pending';
+            // Keep as pending
         } else if (transactionStatus === 'cancel' || transactionStatus === 'deny' || transactionStatus === 'expire') {
             paymentStatus = 'failed';
             newStatus = 'cancelled';
+            statusChanged = true;
         }
 
-        await db.update('orders.json', order.id, {
-            status: newStatus,
-            paymentStatus,
-            transactionStatus,
-            fraudStatus: fraudStatus || null
-        });
+        if (statusChanged || paymentStatus !== order.paymentStatus) {
+            order.status = newStatus;
+            order.paymentStatus = paymentStatus;
+            order.transactionStatus = transactionStatus;
+            order.fraudStatus = fraudStatus || null;
+            await order.save();
+        }
 
         res.json({ message: 'Notification processed' });
     } catch (error) {
@@ -278,11 +291,7 @@ router.post('/notification', async (req, res) => {
 // Get user orders
 router.get('/user', authenticateToken, async (req, res) => {
     try {
-        const orders = await db.findAll('orders.json', { userId: req.user.id });
-
-        // Sort by creation date (newest first)
-        orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
+        const orders = await Order.find({ userId: req.user.id }).sort({ createdAt: -1 });
         res.json(orders);
     } catch (error) {
         console.error('Get user orders error:', error);
@@ -293,13 +302,13 @@ router.get('/user', authenticateToken, async (req, res) => {
 // Get single order
 router.get('/:id', authenticateToken, async (req, res) => {
     try {
-        const order = await db.findById('orders.json', req.params.id);
+        const order = await Order.findById(req.params.id);
 
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        if (order.userId !== req.user.id && !req.user.isAdmin) {
+        if (order.userId.toString() !== req.user.id && !req.user.isAdmin) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 
@@ -313,10 +322,9 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // Get all orders (admin only)
 router.get('/', authenticateAdmin, async (req, res) => {
     try {
-        const orders = await db.findAll('orders.json');
-
-        // Sort by creation date (newest first)
-        orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const orders = await Order.find({})
+            .sort({ createdAt: -1 })
+            .populate('userId', 'name email'); // Populate user details
 
         res.json(orders);
     } catch (error) {
@@ -335,19 +343,20 @@ router.put('/:id/status', authenticateAdmin, async (req, res) => {
             return res.status(400).json({ error: 'Invalid status' });
         }
 
-        const order = await db.findById('orders.json', req.params.id);
+        const order = await Order.findById(req.params.id);
 
         if (!order) {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        const updatedOrder = await db.update('orders.json', req.params.id, { status });
+        order.status = status;
+        await order.save();
 
         // Send WhatsApp notification for status update
-        const user = await db.findById('users.json', order.userId);
+        const user = await User.findById(order.userId);
         if (user && status !== 'pending' && status !== 'cancelled') {
             try {
-                await whatsappService.sendOrderStatusUpdate(user, updatedOrder, status);
+                await whatsappService.sendOrderStatusUpdate(user, order, status);
             } catch (err) {
                 console.error('WhatsApp notification error:', err);
             }
@@ -355,7 +364,7 @@ router.put('/:id/status', authenticateAdmin, async (req, res) => {
 
         res.json({
             message: 'Order status updated',
-            order: updatedOrder
+            order
         });
     } catch (error) {
         console.error('Update order status error:', error);

@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../utils/db');
+const User = require('../models/User');
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.post('/register', async (req, res) => {
         }
 
         // Check if email already exists
-        const existingUser = await db.findOne('users.json', { email });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ error: 'Email already registered' });
         }
@@ -25,7 +25,7 @@ router.post('/register', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create user
-        const user = await db.insert('users.json', {
+        const user = await User.create({
             name,
             email,
             password: hashedPassword,
@@ -35,33 +35,36 @@ router.post('/register', async (req, res) => {
             isAdmin: false
         });
 
-        // Remove password from response
-        delete user.password;
-
         // Send welcome WhatsApp message
         const whatsappService = require('../utils/whatsapp');
         console.log('📱 Attempting to send welcome WhatsApp message...');
         console.log('📱 User phone:', user.phone);
         console.log('📱 User name:', user.name);
         try {
-            const whatsappResult = await whatsappService.sendWelcomeMessage(user);
+            const whatsappResult = await whatsappService.sendWelcomeMessage({
+                phone: user.phone,
+                name: user.name
+            });
             console.log('📱 WhatsApp message sent successfully:', whatsappResult);
         } catch (err) {
             console.error('❌ WhatsApp welcome message error:', err.message);
-            console.error('❌ Full error:', err);
             // Don't fail registration if WhatsApp fails
         }
 
         // Generate JWT token
         const token = jwt.sign(
-            { id: user.id, email: user.email, isAdmin: false },
+            { id: user._id.toString(), email: user.email, isAdmin: false },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
 
+        // Convert to plain object and remove password
+        const userObj = user.toObject();
+        delete userObj.password;
+
         res.status(201).json({
             message: 'Registration successful',
-            user,
+            user: userObj,
             token
         });
     } catch (error) {
@@ -80,7 +83,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Find user
-        const user = await db.findOne('users.json', { email });
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -93,17 +96,18 @@ router.post('/login', async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign(
-            { id: user.id, email: user.email, isAdmin: user.isAdmin || false },
+            { id: user._id.toString(), email: user.email, isAdmin: user.isAdmin || false },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
 
-        // Remove password from response
-        delete user.password;
+        // Convert to plain object and remove password
+        const userObj = user.toObject();
+        delete userObj.password;
 
         res.json({
             message: 'Login successful',
-            user,
+            user: userObj,
             token
         });
     } catch (error) {
@@ -121,8 +125,12 @@ router.post('/admin/login', async (req, res) => {
             return res.status(400).json({ error: 'Username and password are required' });
         }
 
-        // Find admin
-        const admin = await db.findOne('admins.json', { username });
+        // Find admin by email (we use email field, but accept username in login)
+        const admin = await User.findOne({
+            email: username.includes('@') ? username : username + '@scentfix.com',
+            isAdmin: true
+        });
+
         if (!admin) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -135,17 +143,18 @@ router.post('/admin/login', async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign(
-            { id: admin.id, username: admin.username, isAdmin: true },
+            { id: admin._id.toString(), username: admin.name, isAdmin: true },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
 
-        // Remove password from response
-        delete admin.password;
+        // Convert to plain object and remove password
+        const adminObj = admin.toObject();
+        delete adminObj.password;
 
         res.json({
             message: 'Admin login successful',
-            admin,
+            admin: { ...adminObj, username: admin.name },
             token
         });
     } catch (error) {

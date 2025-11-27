@@ -21,7 +21,7 @@ export default function ProductCard({ product, onAddToCart }) {
     }
 
     try {
-      await cartAPI.add({ productId: product.id, quantity: 1 });
+      await cartAPI.add({ productId: product._id || product.id, quantity: 1 });
       toast.success('Added to cart!');
       if (onAddToCart) onAddToCart();
     } catch (error) {
@@ -101,7 +101,7 @@ export default function ProductCard({ product, onAddToCart }) {
         }
       `}</style>
 
-      <Link href={`/products/${product.id}`}>
+      <Link href={`/products/${product._id || product.id}`}>
         <div className="product-image-wrapper">
           <Image
             src={product.image || '/assets/products/placeholder.jpg'}
@@ -113,7 +113,7 @@ export default function ProductCard({ product, onAddToCart }) {
       </Link>
 
       <div className="product-info">
-        <Link href={`/products/${product.id}`}>
+        <Link href={`/products/${product._id || product.id}`}>
           <h3>{product.name}</h3>
         </Link>
         <p className="product-description">{product.description}</p>

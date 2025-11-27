@@ -1,5 +1,6 @@
 const express = require('express');
-const db = require('../utils/db');
+const Order = require('../models/Order');
+const Product = require('../models/Product');
 const { authenticateAdmin } = require('../middleware/auth');
 
 const router = express.Router();
@@ -9,42 +10,56 @@ router.get('/financial', authenticateAdmin, async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
 
-        let orders = await db.findAll('orders.json');
+        // Build match query
+        const matchQuery = { paymentStatus: 'paid' };
 
-        // Filter paid orders only
-        orders = orders.filter(order => order.paymentStatus === 'paid');
-
-        // Filter by date range if provided
         if (startDate || endDate) {
-            orders = orders.filter(order => {
-                const orderDate = new Date(order.createdAt);
-                if (startDate && orderDate < new Date(startDate)) return false;
-                if (endDate && orderDate > new Date(endDate)) return false;
-                return true;
-            });
+            matchQuery.createdAt = {};
+            if (startDate) matchQuery.createdAt.$gte = new Date(startDate);
+            if (endDate) matchQuery.createdAt.$lte = new Date(endDate);
         }
 
-        // Calculate metrics
-        const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
-        const totalOrders = orders.length;
-        const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+        // Aggregate financial data
+        const financialData = await Order.aggregate([
+            { $match: matchQuery },
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: '$totalAmount' },
+                    totalOrders: { $sum: 1 }
+                }
+            }
+        ]);
+
+        const result = financialData[0] || { totalRevenue: 0, totalOrders: 0 };
+        const averageOrderValue = result.totalOrders > 0 ? result.totalRevenue / result.totalOrders : 0;
 
         // Revenue by status
+        const statusBreakdownData = await Order.aggregate([
+            { $match: matchQuery },
+            {
+                $group: {
+                    _id: '$status',
+                    revenue: { $sum: '$totalAmount' }
+                }
+            }
+        ]);
+
         const statusBreakdown = {
             'being processed': 0,
             'shipped': 0,
             'delivered': 0
         };
 
-        orders.forEach(order => {
-            if (statusBreakdown.hasOwnProperty(order.status)) {
-                statusBreakdown[order.status] += order.totalAmount;
+        statusBreakdownData.forEach(item => {
+            if (statusBreakdown.hasOwnProperty(item._id)) {
+                statusBreakdown[item._id] = item.revenue;
             }
         });
 
         res.json({
-            totalRevenue,
-            totalOrders,
+            totalRevenue: result.totalRevenue,
+            totalOrders: result.totalOrders,
             averageOrderValue,
             statusBreakdown
         });
@@ -57,9 +72,16 @@ router.get('/financial', authenticateAdmin, async (req, res) => {
 // Get order statistics
 router.get('/orders', authenticateAdmin, async (req, res) => {
     try {
-        const orders = await db.findAll('orders.json');
-
         // Count by status
+        const statusCountsData = await Order.aggregate([
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
         const statusCounts = {
             pending: 0,
             'being processed': 0,
@@ -68,27 +90,38 @@ router.get('/orders', authenticateAdmin, async (req, res) => {
             cancelled: 0
         };
 
-        orders.forEach(order => {
-            if (statusCounts.hasOwnProperty(order.status)) {
-                statusCounts[order.status]++;
+        statusCountsData.forEach(item => {
+            if (statusCounts.hasOwnProperty(item._id)) {
+                statusCounts[item._id] = item.count;
             }
         });
 
         // Count by payment status
+        const paymentStatusCountsData = await Order.aggregate([
+            {
+                $group: {
+                    _id: '$paymentStatus',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
         const paymentStatusCounts = {
             pending: 0,
             paid: 0,
             failed: 0
         };
 
-        orders.forEach(order => {
-            if (paymentStatusCounts.hasOwnProperty(order.paymentStatus)) {
-                paymentStatusCounts[order.paymentStatus]++;
+        paymentStatusCountsData.forEach(item => {
+            if (paymentStatusCounts.hasOwnProperty(item._id)) {
+                paymentStatusCounts[item._id] = item.count;
             }
         });
 
+        const totalOrders = await Order.countDocuments();
+
         res.json({
-            totalOrders: orders.length,
+            totalOrders,
             byStatus: statusCounts,
             byPaymentStatus: paymentStatusCounts
         });
@@ -101,54 +134,38 @@ router.get('/orders', authenticateAdmin, async (req, res) => {
 // Get product performance
 router.get('/products', authenticateAdmin, async (req, res) => {
     try {
-        const orders = await db.findAll('orders.json');
-        const products = await db.findAll('products.json');
-
-        // Count sales per product
-        const productSales = {};
-
-        orders
-            .filter(order => order.paymentStatus === 'paid')
-            .forEach(order => {
-                order.items.forEach(item => {
-                    if (!productSales[item.productId]) {
-                        productSales[item.productId] = {
-                            productId: item.productId,
-                            name: item.name,
-                            totalQuantity: 0,
-                            totalRevenue: 0,
-                            orderCount: 0
-                        };
-                    }
-
-                    productSales[item.productId].totalQuantity += item.quantity;
-                    productSales[item.productId].totalRevenue += item.price * item.quantity;
-                    productSales[item.productId].orderCount++;
-                });
-            });
-
-        // Convert to array and sort by revenue
-        const productPerformance = Object.values(productSales).sort(
-            (a, b) => b.totalRevenue - a.totalRevenue
-        );
+        // Aggregate product sales from paid orders
+        const productPerformance = await Order.aggregate([
+            { $match: { paymentStatus: 'paid' } },
+            { $unwind: '$items' },
+            {
+                $group: {
+                    _id: '$items.productId',
+                    name: { $first: '$items.name' },
+                    totalQuantity: { $sum: '$items.quantity' },
+                    totalRevenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },
+                    orderCount: { $sum: 1 }
+                }
+            },
+            { $sort: { totalRevenue: -1 } }
+        ]);
 
         // Get current stock info
-        const enrichedPerformance = productPerformance.map(perf => {
-            const product = products.find(p => p.id === perf.productId);
+        const enrichedPerformance = await Promise.all(productPerformance.map(async (perf) => {
+            const product = await Product.findById(perf._id);
             return {
-                ...perf,
-                currentStock: product?.stock || 0
+                productId: perf._id,
+                name: perf.name,
+                totalQuantity: perf.totalQuantity,
+                totalRevenue: perf.totalRevenue,
+                orderCount: perf.orderCount,
+                currentStock: product?.stock || 0,
+                productName: perf.name,
+                totalSold: perf.totalQuantity
             };
-        });
-
-        // Map to add productName field for frontend
-        const performanceWithNames = enrichedPerformance.map(item => ({
-            ...item,
-            productName: item.name,
-            totalSold: item.totalQuantity
         }));
 
-        res.json(performanceWithNames);
+        res.json(enrichedPerformance);
     } catch (error) {
         console.error('Product performance error:', error);
         res.status(500).json({ error: 'Failed to generate product performance report' });
@@ -160,31 +177,32 @@ router.get('/charts', authenticateAdmin, async (req, res) => {
     try {
         const { period = 'daily', days = 30 } = req.query;
 
-        const orders = await db.findAll('orders.json');
-        const paidOrders = orders.filter(order => order.paymentStatus === 'paid');
-
         // Calculate date range
         const endDate = new Date();
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - parseInt(days));
 
-        // Revenue by day
-        const dailyRevenue = {};
-        const dailyOrders = {};
-
-        paidOrders.forEach(order => {
-            const orderDate = new Date(order.createdAt);
-            if (orderDate >= startDate && orderDate <= endDate) {
-                const dateKey = orderDate.toISOString().split('T')[0];
-
-                if (!dailyRevenue[dateKey]) {
-                    dailyRevenue[dateKey] = 0;
-                    dailyOrders[dateKey] = 0;
+        // Revenue by day aggregation
+        const dailyData = await Order.aggregate([
+            {
+                $match: {
+                    paymentStatus: 'paid',
+                    createdAt: { $gte: startDate, $lte: endDate }
                 }
-
-                dailyRevenue[dateKey] += order.totalAmount;
-                dailyOrders[dateKey]++;
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    revenue: { $sum: '$totalAmount' },
+                    orders: { $sum: 1 }
+                }
             }
+        ]);
+
+        // Convert to map for easy lookup
+        const dailyMap = {};
+        dailyData.forEach(item => {
+            dailyMap[item._id] = item;
         });
 
         // Create complete date range
@@ -194,34 +212,44 @@ router.get('/charts', authenticateAdmin, async (req, res) => {
 
         while (currentDate <= endDate) {
             const dateKey = currentDate.toISOString().split('T')[0];
+            const data = dailyMap[dateKey] || { revenue: 0, orders: 0 };
 
             revenueChart.push({
                 date: dateKey,
-                revenue: dailyRevenue[dateKey] || 0
+                revenue: data.revenue
             });
 
             ordersChart.push({
                 date: dateKey,
-                orders: dailyOrders[dateKey] || 0
+                orders: data.orders
             });
 
             currentDate.setDate(currentDate.getDate() + 1);
         }
 
         // Status distribution for pie chart
+        const statusDistributionData = await Order.aggregate([
+            { $match: { paymentStatus: 'paid' } },
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
         const statusDistribution = {
             'being processed': 0,
             'shipped': 0,
             'delivered': 0
         };
 
-        paidOrders.forEach(order => {
-            if (statusDistribution.hasOwnProperty(order.status)) {
-                statusDistribution[order.status]++;
+        statusDistributionData.forEach(item => {
+            if (statusDistribution.hasOwnProperty(item._id)) {
+                statusDistribution[item._id] = item.count;
             }
         });
 
-        // Format status distribution for pie chart
         const formattedDistribution = Object.entries(statusDistribution).map(([status, count]) => ({
             status,
             count

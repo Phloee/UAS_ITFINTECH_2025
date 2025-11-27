@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
-const db = require('../utils/db');
+const Product = require('../models/Product');
 const { authenticateAdmin } = require('../middleware/auth');
 
 const router = express.Router();
@@ -46,7 +46,7 @@ const upload = multer({
 // Get all products (public)
 router.get('/', async (req, res) => {
     try {
-        const products = await db.findAll('products.json');
+        const products = await Product.find({}).sort({ createdAt: -1 });
         res.json(products);
     } catch (error) {
         console.error('Get products error:', error);
@@ -57,7 +57,7 @@ router.get('/', async (req, res) => {
 // Get single product (public)
 router.get('/:id', async (req, res) => {
     try {
-        const product = await db.findById('products.json', req.params.id);
+        const product = await Product.findById(req.params.id);
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
@@ -82,7 +82,7 @@ router.post('/', authenticateAdmin, upload.single('image'), async (req, res) => 
             ? `/assets/products/${folderName}/main${path.extname(req.file.originalname)}`
             : null;
 
-        const product = await db.insert('products.json', {
+        const product = await Product.create({
             name,
             description,
             price: parseFloat(price),
@@ -105,7 +105,7 @@ router.post('/', authenticateAdmin, upload.single('image'), async (req, res) => 
 router.put('/:id', authenticateAdmin, upload.single('image'), async (req, res) => {
     try {
         const { name, description, price, stock } = req.body;
-        const product = await db.findById('products.json', req.params.id);
+        const product = await Product.findById(req.params.id);
 
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
@@ -125,7 +125,11 @@ router.put('/:id', authenticateAdmin, upload.single('image'), async (req, res) =
             updates.folderName = folderName;
         }
 
-        const updatedProduct = await db.update('products.json', req.params.id, updates);
+        const updatedProduct = await Product.findByIdAndUpdate(
+            req.params.id,
+            updates,
+            { new: true }
+        );
 
         res.json({
             message: 'Product updated successfully',
@@ -140,7 +144,7 @@ router.put('/:id', authenticateAdmin, upload.single('image'), async (req, res) =
 // Delete product (admin only)
 router.delete('/:id', authenticateAdmin, async (req, res) => {
     try {
-        const product = await db.findById('products.json', req.params.id);
+        const product = await Product.findById(req.params.id);
 
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
@@ -156,7 +160,7 @@ router.delete('/:id', authenticateAdmin, async (req, res) => {
             }
         }
 
-        await db.delete('products.json', req.params.id);
+        await Product.findByIdAndDelete(req.params.id);
 
         res.json({ message: 'Product deleted successfully' });
     } catch (error) {

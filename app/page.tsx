@@ -259,7 +259,7 @@ export default function Home() {
           ) : (
             <div className="products-grid">
               {products.slice(0, 3).map((product) => (
-                <Link href={`/products/${product.id}`} key={product.id} className="product-card-home">
+                <Link href={`/products/${product._id || product.id}`} key={product._id || product.id} className="product-card-home">
                   <div className="product-image-wrapper">
                     <Image
                       src={product.image || '/assets/products/placeholder.jpg'}
