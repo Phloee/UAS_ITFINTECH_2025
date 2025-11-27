@@ -5,9 +5,9 @@ class MidtransService {
         // Trim keys to remove any accidental whitespace
         this.serverKey = process.env.MIDTRANS_SERVER_KEY ? process.env.MIDTRANS_SERVER_KEY.trim() : '';
         this.clientKey = process.env.MIDTRANS_CLIENT_KEY ? process.env.MIDTRANS_CLIENT_KEY.trim() : '';
-        // Robust check for production mode (handle spaces, case sensitivity)
-        const isProdEnv = String(process.env.MIDTRANS_IS_PRODUCTION || '').trim().toLowerCase();
-        this.isProduction = isProdEnv === 'true';
+        // Auto-detect environment based on Server Key prefix
+        // Sandbox keys start with 'SB-', Production keys do not.
+        this.isProduction = !this.serverKey.startsWith('SB-');
 
         // Snap API URL
         this.snapUrl = this.isProduction
