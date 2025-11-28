@@ -20,21 +20,38 @@ export default function AnimatedText({
   const safeScrollProgress = scrollProgress ?? 0;
 
   const words = text.split(' ');
-  const textWithoutSpaces = text.replace(/ /g, '').replace(/[.,!?]/g, '');
-  const totalChars = textWithoutSpaces.length;
+
+  // Define color palette for words (Tokopedia-style: green gradient to white)
+  const wordColors = [
+    '#16a085', // teal
+    '#1abc9c', // turquoise
+    '#2ecc71', // emerald
+    '#27ae60', // green
+    '#3498db', // blue
+    '#9b59b6', // purple
+  ];
 
   return (
     <Component className={className}>
       {words.map((word, wordIndex) => {
-        const wordStart = text.substring(0, text.indexOf(word)).replace(/ /g, '').replace(/[.,!?]/g, '').length;
+        // Calculate word color based on index
+        const wordColor = wordColors[wordIndex % wordColors.length];
 
         return (
           <span key={wordIndex} className="word-wrapper">
             {word.split('').map((char, charIndex) => {
-              const currentIndex = wordStart + charIndex;
-              // Slower animation: use 0.8 multiplier for spread, 0.5 for transition speed
-              const normalizedDelay = currentIndex / totalChars;
-              const opacity = Math.max(0.15, Math.min(1, (safeScrollProgress - normalizedDelay * 0.8) / 0.5));
+              // Calculate global character index across all text
+              const charsBeforeWord = words.slice(0, wordIndex).join('').length;
+              const globalCharIndex = charsBeforeWord + charIndex;
+              const totalChars = text.replace(/ /g, '').length;
+
+              // Smooth scroll-based opacity (Tokopedia pattern)
+              const progress = globalCharIndex / totalChars;
+              const opacity = Math.max(0.2, Math.min(1, (safeScrollProgress - progress * 0.7) / 0.3));
+
+              // Color transition: from wordColor to white based on opacity
+              const isFullyVisible = opacity > 0.9;
+              const finalColor = isFullyVisible ? '#ffffff' : wordColor;
 
               return (
                 <span
@@ -42,7 +59,8 @@ export default function AnimatedText({
                   className="char-animation"
                   style={{
                     opacity,
-                    color: opacity > 0.9 ? '#ffffff' : `rgba(255, 255, 255, ${opacity})`
+                    color: finalColor,
+                    transition: 'opacity 0.3s ease-out, color 0.3s ease-out'
                   }}
                 >
                   {char}
