@@ -11,6 +11,10 @@ export async function GET(request: NextRequest) {
         const user = requireAuth(request);
         await connectDB();
 
+        // Ensure models are registered (critical for serverless)
+        User; // Reference to ensure User model is loaded
+        Product; // Reference to ensure Product model is loaded
+
         if (user.isAdmin) {
             // Admin: get all orders with user details
             // Note: items already contain product name, price, image from order creation
