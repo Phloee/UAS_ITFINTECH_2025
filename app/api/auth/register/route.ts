@@ -49,6 +49,12 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Email already registered' }, { status: 400 });
         }
 
+        // Check if phone already exists
+        const existingPhone = await User.findOne({ phone });
+        if (existingPhone) {
+            return NextResponse.json({ error: 'Phone number already registered' }, { status: 400 });
+        }
+
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
