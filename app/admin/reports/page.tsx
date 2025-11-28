@@ -186,7 +186,7 @@ export default function AdminReportsPage() {
 
                     <div className="metric-card">
                         <div className="metric-label">Total Orders</div>
-                        <div className="metric-value">{orderStats?.totalOrders || 0}</div>
+                        <div className="metric-value">{financial?.totalOrders || 0}</div>
                     </div>
 
                     <div className="metric-card">
