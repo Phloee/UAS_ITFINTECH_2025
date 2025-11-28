@@ -218,17 +218,28 @@ export default function Navbar() {
           }
 
           .nav-link {
-            padding: var(--spacing-lg) var(--spacing-md);
-            border-bottom: 2px solid var(--color-gray-200);
+            padding: var(--spacing-lg) var(--spacing-xl);
             font-size: 1.125rem;
-            margin: var(--spacing-sm) 0;
-            border-radius: var(--radius-sm);
+            margin: var(--spacing-md) 0;
+            border-radius: var(--radius-md);
             transition: all var(--transition-base);
+            background: white;
+            border: 2px solid var(--color-gray-300);
+            text-align: center;
+            font-weight: 500;
+            display: block;
           }
           
-          .nav-link:hover {
+          .nav-link:hover,
+          .nav-link:active {
             background: var(--color-gray-50);
-            padding-left: var(--spacing-lg);
+            border-color: var(--color-primary-teal);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          }
+          
+          .cart-badge {
+            position: relative;
           }
 
           .nav-links .btn {
