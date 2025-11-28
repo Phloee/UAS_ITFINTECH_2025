@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { products as productsAPI, cart as cartAPI } from '../../utils/api';
@@ -221,7 +222,7 @@ export default function ProductDetailPage() {
           }
         `}</style>
 
-        <a href="/products" className="back-link">← Back to Products</a>
+        <Link href="/products" className="back-link">← Back to Products</Link>
 
         <div className="product-container animate-fade-in">
           <div className="image-section">

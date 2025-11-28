@@ -12,19 +12,21 @@ import toast from 'react-hot-toast';
 
 export default function CartPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState({ items: [], totalAmount: 0 });
 
   useEffect(() => {
+    if (authLoading) return;
+
     if (!user || user.isAdmin) {
       toast.error('Please login to view your cart');
       router.push('/auth/login');
       return;
     }
     fetchCart();
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchCart = async () => {
     try {
@@ -121,7 +123,7 @@ export default function CartPage() {
     }
   };
 
-  if (loading || !user) {
+  if (authLoading || loading || !user) {
     return (
       <>
         <Navbar />

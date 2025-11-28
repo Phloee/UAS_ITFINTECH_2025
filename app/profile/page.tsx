@@ -9,18 +9,20 @@ import { orders as ordersAPI } from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const router = useRouter();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
+
     if (!user || user.isAdmin) {
       router.push('/auth/login');
       return;
     }
     fetchOrders();
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchOrders = async () => {
     try {
@@ -43,6 +45,14 @@ export default function ProfilePage() {
     };
     return colors[status] || '#6b7280';
   };
+
+  if (authLoading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '5rem' }}>
+        <div className="spinner" style={{ margin: '0 auto' }}></div>
+      </div>
+    );
+  }
 
   if (!user) return null;
 

@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [cart, setCart] = useState({ items: [], totalAmount: 0 });
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -36,6 +36,8 @@ export default function CheckoutPage() {
     console.log('Midtrans Client Key:', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY ? 'Present' : 'Missing');
     console.log('Production Mode:', process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION);
 
+    if (authLoading) return;
+
     if (!user || user.isAdmin) {
       toast.error('Please login to checkout');
       router.push('/auth/login');
@@ -44,7 +46,7 @@ export default function CheckoutPage() {
     fetchCart();
 
     return () => clearTimeout(timer);
-  }, [user]);
+  }, [user, authLoading]);
 
   const fetchCart = async () => {
     try {
@@ -109,7 +111,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (loading || !user) {
+  if (authLoading || loading || !user) {
     return (
       <>
         <Navbar />

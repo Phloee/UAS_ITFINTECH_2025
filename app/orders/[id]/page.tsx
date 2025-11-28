@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { orders as ordersAPI } from '../../utils/api';
@@ -381,7 +382,7 @@ export default function OrderDetailPage() {
           }
         `}</style>
 
-        <a href="/profile" className="back-link">← Back to Profile</a>
+        <Link href="/profile" className="back-link">← Back to Profile</Link>
 
         <div className="page-header">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
