@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Order from '@/backend/models/Order';
+import User from '@/backend/models/User';
+import Product from '@/backend/models/Product';
 import { requireAuth, requireAdmin, unauthorizedResponse, forbiddenResponse } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
