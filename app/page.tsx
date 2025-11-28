@@ -248,7 +248,8 @@ export default function Home() {
             background-image: url('https://down-id.img.susercontent.com/file/id-11134207-8224u-mgixs9jdfmdr8b');
             background-size: cover;
             background-repeat: no-repeat;
-            min-height: 100vh;
+            background-repeat: no-repeat;
+            padding-bottom: var(--spacing-4xl);
             transition: background-position 0.1s ease-out;
           }
 
@@ -384,7 +385,7 @@ export default function Home() {
                 />
 
                 <AnimatedText
-                  text="Our premium shoe deodorant patches are carefully crafted using natural ingredients that neutralize odors at their source. Unlike traditional sprays and powders, our patches provide long-lasting protection that keeps your shoes fresh all day long."
+                  text="Our premium shoe deodorant patches are carefully crafted using selected ingredients that neutralize odors at their source. Unlike traditional sprays and powders, our patches provide long-lasting protection that keeps your shoes fresh all day long."
                   scrollProgress={scrollProgress}
                   paragraphIndex={1}
                   totalParagraphs={3}
