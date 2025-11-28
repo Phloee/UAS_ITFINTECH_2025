@@ -218,24 +218,24 @@ export default function Navbar() {
           }
 
           .nav-link {
-            padding: var(--spacing-lg) var(--spacing-xl);
-            font-size: 1.125rem;
-            margin: var(--spacing-md) 0;
-            border-radius: var(--radius-md);
+            padding: var(--spacing-lg) var(--spacing-xl) !important;
+            font-size: 1.125rem !important;
+            margin: var(--spacing-md) 0 !important;
+            border-radius: var(--radius-md) !important;
             transition: all var(--transition-base);
-            background: white;
-            border: 2px solid var(--color-gray-300);
-            text-align: center;
-            font-weight: 500;
-            display: block;
+            background: white !important;
+            border: 2px solid var(--color-gray-300) !important;
+            text-align: center !important;
+            font-weight: 500 !important;
+            display: block !important;
           }
           
           .nav-link:hover,
           .nav-link:active {
-            background: var(--color-gray-50);
-            border-color: var(--color-primary-teal);
+            background: var(--color-gray-50) !important;
+            border-color: var(--color-primary-teal) !important;
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
           }
           
           .cart-badge {
