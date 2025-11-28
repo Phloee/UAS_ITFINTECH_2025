@@ -53,8 +53,8 @@ export default function AnimatedText({
               const globalProgress = paragraphProgress + (charProgressInParagraph / totalParagraphs);
 
               // Smooth scroll-based opacity (continuous across paragraphs)
-              // Adjusted: 0.5 multiplier and 0.8 divisor (was 0.4) to significantly slow down animation
-              const opacity = Math.max(0.2, Math.min(1, (safeScrollProgress - globalProgress * 0.5) / 0.8));
+              // Adjusted: 0.4 multiplier and 0.6 divisor (Sum = 1.0) ensures animation finishes exactly at scroll end
+              const opacity = Math.max(0.2, Math.min(1, (safeScrollProgress - globalProgress * 0.4) / 0.6));
 
               // Color transition: from wordColor to white based on opacity
               const isFullyVisible = opacity > 0.85;
