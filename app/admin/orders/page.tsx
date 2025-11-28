@@ -268,7 +268,7 @@ export default function AdminOrdersPage() {
                                 <div>
                                     {order.items?.map((item, idx) => (
                                         <div key={idx} style={{ fontSize: '0.875rem' }}>
-                                            {item.productId?.name || 'Product'} x{item.quantity}
+                                            {item.name || 'Product'} x{item.quantity}
                                         </div>
                                     ))}
                                 </div>

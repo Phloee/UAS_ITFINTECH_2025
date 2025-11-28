@@ -10,26 +10,17 @@ export async function GET(request: NextRequest) {
         await connectDB();
 
         if (user.isAdmin) {
-            // Admin: get all orders with user and product details
+            // Admin: get all orders with user details
+            // Note: items already contain product name, price, image from order creation
             const orders = await Order.find({})
                 .sort({ createdAt: -1 })
-                .populate('userId', 'name email phone')
-                .populate({
-                    path: 'items.productId',
-                    select: 'name price image'
-                })
-                .lean(); // Use lean() for better performance with populated data
+                .populate('userId', 'name email phone');
 
             return NextResponse.json(orders);
         } else {
-            // User: get own orders with product details
+            // User: get own orders
             const orders = await Order.find({ userId: user.id })
-                .sort({ createdAt: -1 })
-                .populate({
-                    path: 'items.productId',
-                    select: 'name price image'
-                })
-                .lean();
+                .sort({ createdAt: -1 });
             return NextResponse.json(orders);
         }
     } catch (error) {
