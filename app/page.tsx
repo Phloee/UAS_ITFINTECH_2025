@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import AnimatedText from './components/AnimatedText';
 import { useEffect, useState } from 'react';
 import { products as productsAPI } from './utils/api';
 
@@ -232,6 +233,28 @@ export default function Home() {
             margin-top: var(--spacing-xl);
           }
 
+          .animated-paragraph {
+            font-size: 1.125rem;
+            font-weight: 400;
+            line-height: 1.8;
+            margin-bottom: var(--spacing-lg);
+          }
+
+          .animated-paragraph:first-child {
+            font-size: 1.5rem;
+            font-weight: 600;
+          }
+
+          .word-wrapper {
+            display: inline-block;
+            margin-right: 0.3em;
+          }
+
+          .char-animation {
+            display: inline-block;
+            transition: all 0.3s ease-out;
+          }
+
           .about-text h3 {
             font-size: 1.5rem;
             font-weight: 600;
@@ -282,23 +305,27 @@ export default function Home() {
             <h2 className="section-title">About ScentFix</h2>
             <div className="about-content">
               <div className="about-text">
-                <h3>Our Story</h3>
-                <p>
-                  ScentFix was born from a simple idea: everyone deserves fresh, odor-free shoes.
-                  We understand the embarrassment and discomfort that smelly shoes can cause,
-                  and we're here to provide a simple, effective solution.
-                </p>
-                <p>
-                  Our premium shoe deodorant patches are carefully crafted using natural ingredients
-                  that neutralize odors at their source. Unlike traditional sprays and powders,
-                  our patches provide long-lasting protection that keeps your shoes fresh all day long.
-                </p>
-                <h3 style={{ marginTop: 'var(--spacing-xl)' }}>Our Mission</h3>
-                <p>
-                  To make fresh, confident steps accessible to everyone through innovative,
-                  eco-friendly shoe care solutions. We believe that small details make a big difference
-                  in your daily confidence and comfort.
-                </p>
+                <AnimatedText
+                  text="ScentFix was born from a simple idea: everyone deserves fresh, odor-free shoes. We understand the embarrassment and discomfort that smelly shoes can cause, and we are here to provide a simple, effective solution."
+                  scrollProgress={scrollProgress}
+                  baseDelay={0}
+                  as="h3"
+                  className="animated-paragraph"
+                />
+
+                <AnimatedText
+                  text="Our premium shoe deodorant patches are carefully crafted using natural ingredients that neutralize odors at their source. Unlike traditional sprays and powders, our patches provide long-lasting protection that keeps your shoes fresh all day long."
+                  scrollProgress={scrollProgress}
+                  baseDelay={150}
+                  className="animated-paragraph"
+                />
+
+                <AnimatedText
+                  text="To make fresh, confident steps accessible to everyone through innovative, eco-friendly shoe care solutions. We believe that small details make a big difference in your daily confidence and comfort."
+                  scrollProgress={scrollProgress}
+                  baseDelay={300}
+                  className="animated-paragraph"
+                />
               </div>
             </div>
           </div>
