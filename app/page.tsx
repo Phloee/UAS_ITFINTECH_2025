@@ -248,8 +248,7 @@ export default function Home() {
             background-image: url('https://down-id.img.susercontent.com/file/id-11134207-8224u-mgixs9jdfmdr8b');
             background-size: cover;
             background-repeat: no-repeat;
-            background-repeat: no-repeat;
-            padding-bottom: var(--spacing-4xl);
+            padding-bottom: 150px;
             transition: background-position 0.1s ease-out;
           }
 
