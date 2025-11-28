@@ -21,6 +21,12 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'Email already registered' });
         }
 
+        // Check if phone already exists
+        const existingPhone = await User.findOne({ phone });
+        if (existingPhone) {
+            return res.status(400).json({ error: 'Phone number already registered' });
+        }
+
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
