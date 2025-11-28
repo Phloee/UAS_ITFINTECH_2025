@@ -246,9 +246,23 @@ export default function Home() {
             position: relative;
             padding: var(--spacing-3xl) var(--spacing-lg);
             background-image: url('https://down-id.img.susercontent.com/file/id-11134207-8224u-mgixs9jdfmdr8b');
-            background-size: cover;
+            background-size: 120%;
             background-position: center center;
+            background-repeat: no-repeat;
             min-height: 60vh;
+            animation: backgroundMove 30s ease-in-out infinite alternate;
+          }
+
+          @keyframes backgroundMove {
+            0% {
+              background-position: 40% center;
+            }
+            50% {
+              background-position: 60% center;
+            }
+            100% {
+              background-position: 40% center;
+            }
           }
 
           @media (max-width: 768px) {

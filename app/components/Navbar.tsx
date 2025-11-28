@@ -291,10 +291,12 @@ export default function Navbar() {
           {user && !user.isAdmin && (
             <>
               <Link href="/products" className="nav-link" onClick={handleLinkClick}>Products</Link>
-              <Link href="/profile" className="nav-link" onClick={handleLinkClick}>Orders</Link>
               <Link href="/cart" className="nav-link cart-badge" onClick={handleLinkClick}>
                 🛒 Cart
                 {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+              </Link>
+              <Link href="/profile" className="nav-link" onClick={handleLinkClick} title="Profile">
+                👤
               </Link>
               <button onClick={handleLogout} className="btn btn-outline btn-sm">Logout</button>
             </>
