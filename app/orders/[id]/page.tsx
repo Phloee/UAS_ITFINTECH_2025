@@ -421,10 +421,37 @@ export default function OrderDetailPage() {
                       padding: '0.5rem 1rem',
                       borderRadius: 'var(--radius-md)',
                       cursor: checkingStatus ? 'not-allowed' : 'pointer',
-                      opacity: checkingStatus ? 0.6 : 1
+                      opacity: checkingStatus ? 0.6 : 1,
+                      width: '100%'
                     }}
                   >
                     {checkingStatus ? '⏳ Checking...' : '🔄 Refresh Payment Status'}
+                  </button>
+                  <button
+                    className="btn btn-sm btn-outline"
+                    onClick={async () => {
+                      if (!confirm('Are you sure you want to cancel this order?')) return;
+                      try {
+                        setCheckingStatus(true);
+                        await ordersAPI.cancel(params.id);
+                        toast.success('Order cancelled');
+                        fetchOrder();
+                      } catch (error) {
+                        toast.error('Failed to cancel order');
+                      } finally {
+                        setCheckingStatus(false);
+                      }
+                    }}
+                    disabled={checkingStatus}
+                    style={{
+                      marginTop: '0.5rem',
+                      fontSize: '0.875rem',
+                      width: '100%',
+                      borderColor: '#ef4444',
+                      color: '#ef4444'
+                    }}
+                  >
+                    ✕ Cancel Order
                   </button>
                 </>
               )}
@@ -503,7 +530,7 @@ export default function OrderDetailPage() {
             </div>
           </div>
         </div>
-      </main>
+      </main >
 
       <Footer />
     </>

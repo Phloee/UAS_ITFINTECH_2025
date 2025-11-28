@@ -103,12 +103,15 @@ export default function CheckoutPage() {
         },
         onClose: async function () {
           setProcessing(false);
+          const toastId = toast.loading('Cancelling order...');
           try {
             await ordersAPI.cancel(order._id || order.id);
-            toast.error('Payment cancelled');
-            router.push(`/orders/${order._id || order.id}`);
+            toast.success('Order cancelled', { id: toastId });
           } catch (error) {
             console.error('Failed to cancel order:', error);
+            toast.error('Order pending', { id: toastId });
+          } finally {
+            router.push(`/orders/${order._id || order.id}`);
           }
         }
       });
