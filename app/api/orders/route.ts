@@ -14,11 +14,22 @@ export async function GET(request: NextRequest) {
             const orders = await Order.find({})
                 .sort({ createdAt: -1 })
                 .populate('userId', 'name email phone')
-                .populate('items.productId', 'name price image');
+                .populate({
+                    path: 'items.productId',
+                    select: 'name price image'
+                })
+                .lean(); // Use lean() for better performance with populated data
+
             return NextResponse.json(orders);
         } else {
-            // User: get own orders
-            const orders = await Order.find({ userId: user.id }).sort({ createdAt: -1 });
+            // User: get own orders with product details
+            const orders = await Order.find({ userId: user.id })
+                .sort({ createdAt: -1 })
+                .populate({
+                    path: 'items.productId',
+                    select: 'name price image'
+                })
+                .lean();
             return NextResponse.json(orders);
         }
     } catch (error) {
