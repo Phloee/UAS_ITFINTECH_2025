@@ -24,7 +24,7 @@ export default function Home() {
         const rect = aboutSection.getBoundingClientRect();
         const windowHeight = window.innerHeight;
         const sectionTop = rect.top;
-        
+
         // Calculate progress (0 to 1) as section scrolls into view
         let progress = 0;
         if (sectionTop < windowHeight && sectionTop > -rect.height) {
@@ -36,7 +36,7 @@ export default function Home() {
 
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial check
-    
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -243,13 +243,35 @@ export default function Home() {
           }
 
           .about-section {
+            position: relative;
             padding: var(--spacing-3xl) var(--spacing-lg);
-            background: white;
+            background-image: url('https://down-id.img.susercontent.com/file/id-11134207-8224u-mgixs9jdfmdr8b');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 60vh;
+          }
+
+          .about-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1;
           }
 
           .about-container {
+            position: relative;
+            z-index: 2;
             max-width: 900px;
             margin: 0 auto;
+          }
+
+          .section-title {
+            color: white !important;
           }
 
           .about-content {
@@ -261,11 +283,13 @@ export default function Home() {
             font-weight: 400;
             line-height: 1.8;
             margin-bottom: var(--spacing-lg);
+            color: white;
           }
 
           .animated-paragraph:first-child {
             font-size: 1.5rem;
             font-weight: 600;
+            color: white;
           }
 
           .word-wrapper {
