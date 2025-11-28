@@ -247,9 +247,16 @@ export default function Home() {
             padding: var(--spacing-3xl) var(--spacing-lg);
             background-image: url('https://down-id.img.susercontent.com/file/id-11134207-8224u-mgixs9jdfmdr8b');
             background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+            background-position: center center;
             min-height: 60vh;
+          }
+
+          @media (max-width: 768px) {
+            .about-section {
+              background-attachment: scroll;
+              background-size: cover;
+              background-position: center center;
+            }
           }
 
           .about-section::before {
@@ -287,8 +294,8 @@ export default function Home() {
           }
 
           .animated-paragraph:first-child {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 1.125rem;
+            font-weight: 400;
             color: white;
           }
 
@@ -363,14 +370,12 @@ export default function Home() {
                 <AnimatedText
                   text="Our premium shoe deodorant patches are carefully crafted using natural ingredients that neutralize odors at their source. Unlike traditional sprays and powders, our patches provide long-lasting protection that keeps your shoes fresh all day long."
                   scrollProgress={scrollProgress}
-                  baseDelay={150}
                   className="animated-paragraph"
                 />
 
                 <AnimatedText
                   text="To make fresh, confident steps accessible to everyone through innovative, eco-friendly shoe care solutions. We believe that small details make a big difference in your daily confidence and comfort."
                   scrollProgress={scrollProgress}
-                  baseDelay={300}
                   className="animated-paragraph"
                 />
               </div>
