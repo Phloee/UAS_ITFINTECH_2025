@@ -57,7 +57,7 @@ export default function Footer() {
         <p>Premium shoe deodorant patches for fresh, odor-free shoes.</p>
 
         <div className="footer-links">
-          <a href="#" className="footer-link">About Us</a>
+          <a href="/#about" className="footer-link">About Us</a>
           <a href="/contact" className="footer-link">Contact</a>
         </div>
 

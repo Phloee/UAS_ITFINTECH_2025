@@ -217,6 +217,34 @@ export default function Home() {
               min-height: 250px;
             }
           }
+
+          .about-section {
+            padding: var(--spacing-3xl) var(--spacing-lg);
+            background: white;
+          }
+
+          .about-container {
+            max-width: 900px;
+            margin: 0 auto;
+          }
+
+          .about-content {
+            margin-top: var(--spacing-xl);
+          }
+
+          .about-text h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-md);
+            color: var(--color-gray-900);
+          }
+
+          .about-text p {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--color-gray-700);
+            margin-bottom: var(--spacing-lg);
+          }
         `}</style>
 
         {/* Hero Section */}
@@ -244,6 +272,34 @@ export default function Home() {
             <div className="feature-card" style={{ backgroundImage: 'url(/assets/features/shoes.jpg)' }}>
               <h3 className="feature-title">Easy to Use</h3>
               <p>Simply peel and stick inside your shoes for instant freshness.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* About Us Section */}
+        <section id="about" className="about-section">
+          <div className="about-container">
+            <h2 className="section-title">About ScentFix</h2>
+            <div className="about-content">
+              <div className="about-text">
+                <h3>Our Story</h3>
+                <p>
+                  ScentFix was born from a simple idea: everyone deserves fresh, odor-free shoes.
+                  We understand the embarrassment and discomfort that smelly shoes can cause,
+                  and we're here to provide a simple, effective solution.
+                </p>
+                <p>
+                  Our premium shoe deodorant patches are carefully crafted using natural ingredients
+                  that neutralize odors at their source. Unlike traditional sprays and powders,
+                  our patches provide long-lasting protection that keeps your shoes fresh all day long.
+                </p>
+                <h3 style={{ marginTop: 'var(--spacing-xl)' }}>Our Mission</h3>
+                <p>
+                  To make fresh, confident steps accessible to everyone through innovative,
+                  eco-friendly shoe care solutions. We believe that small details make a big difference
+                  in your daily confidence and comfort.
+                </p>
+              </div>
             </div>
           </div>
         </section>
