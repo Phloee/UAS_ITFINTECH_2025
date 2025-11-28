@@ -217,6 +217,7 @@ export default function Navbar() {
             right: 0;
           }
 
+          .nav-links .mobile-menu-item,
           .nav-link {
             padding: var(--spacing-lg) var(--spacing-xl) !important;
             font-size: 1.125rem !important;
@@ -224,22 +225,20 @@ export default function Navbar() {
             border-radius: var(--radius-md) !important;
             transition: all var(--transition-base);
             background: white !important;
-            border: 2px solid var(--color-gray-300) !important;
+            border: 2px solid #d1d5db !important;
             text-align: center !important;
             font-weight: 500 !important;
             display: block !important;
           }
           
+          .nav-links .mobile-menu-item:hover,
+          .nav-links .mobile-menu-item:active,
           .nav-link:hover,
           .nav-link:active {
-            background: var(--color-gray-50) !important;
-            border-color: var(--color-primary-teal) !important;
+            background: #f9fafb !important;
+            border-color: #16a085 !important;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
-          }
-          
-          .cart-badge {
-            position: relative;
           }
 
           .nav-links .btn {
@@ -311,14 +310,13 @@ export default function Navbar() {
 
           {user && !user.isAdmin && (
             <>
-              <Link href="/products" className="nav-link" onClick={handleLinkClick}>Products</Link>
-              <Link href="/cart" className="nav-link cart-badge" onClick={handleLinkClick}>
-                🛒 Cart
-                {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+              <Link href="/products" className="nav-link mobile-menu-item" onClick={handleLinkClick}>Products</Link>
+              <Link href="/cart" className="nav-link mobile-menu-item" onClick={handleLinkClick}>
+                🛒 Cart {cartCount > 0 && `(${cartCount})`}
               </Link>
-              <Link href="/profile" className="nav-link" onClick={handleLinkClick}>Orders</Link>
-              <Link href="/profile" className="nav-link" onClick={handleLinkClick} title="Profile" style={{ color: '#2ecc71', fontSize: '1.5rem' }}>
-                👤
+              <Link href="/profile" className="nav-link mobile-menu-item" onClick={handleLinkClick}>Orders</Link>
+              <Link href="/profile" className="nav-link mobile-menu-item" onClick={handleLinkClick}>
+                👤 Profile
               </Link>
               <button onClick={handleLogout} className="btn btn-outline btn-sm">Logout</button>
             </>
