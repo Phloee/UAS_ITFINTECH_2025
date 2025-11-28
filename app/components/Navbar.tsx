@@ -295,7 +295,8 @@ export default function Navbar() {
                 🛒 Cart
                 {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
               </Link>
-              <Link href="/profile" className="nav-link" onClick={handleLinkClick} title="Profile">
+              <Link href="/profile" className="nav-link" onClick={handleLinkClick}>Orders</Link>
+              <Link href="/profile" className="nav-link" onClick={handleLinkClick} title="Profile" style={{ color: '#2ecc71', fontSize: '1.5rem' }}>
                 👤
               </Link>
               <button onClick={handleLogout} className="btn btn-outline btn-sm">Logout</button>

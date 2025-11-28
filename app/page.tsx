@@ -246,7 +246,7 @@ export default function Home() {
             position: relative;
             padding: var(--spacing-3xl) var(--spacing-lg);
             background-image: url('https://down-id.img.susercontent.com/file/id-11134207-8224u-mgixs9jdfmdr8b');
-            background-size: 120%;
+            background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
             min-height: 60vh;
