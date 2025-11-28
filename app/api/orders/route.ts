@@ -30,6 +30,12 @@ export async function GET(request: NextRequest) {
             return unauthorizedResponse();
         }
         console.error('Get orders error:', error);
-        return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });
+        console.error('Error stack:', error.stack);
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        return NextResponse.json({
+            error: 'Failed to fetch orders',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        }, { status: 500 });
     }
 }

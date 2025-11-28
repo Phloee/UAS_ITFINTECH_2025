@@ -109,6 +109,18 @@ export default function AdminOrdersPage() {
           display: flex;
           gap: var(--spacing-sm);
           margin-bottom: var(--spacing-xl);
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          padding-bottom: var(--spacing-sm);
+        }
+        
+        .filters::-webkit-scrollbar {
+          height: 6px;
+        }
+        
+        .filters::-webkit-scrollbar-thumb {
+          background: var(--color-gray-300);
+          border-radius: 3px;
         }
         
         .filter-btn {
@@ -119,6 +131,8 @@ export default function AdminOrdersPage() {
           cursor: pointer;
           transition: all var(--transition-base);
           font-weight: 500;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
         
         .filter-btn.active {

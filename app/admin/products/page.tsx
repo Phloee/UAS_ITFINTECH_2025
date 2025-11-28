@@ -171,6 +171,24 @@ export default function AdminProductsPage() {
           align-items: center;
         }
         
+        @media (max-width: 768px) {
+          .product-row {
+            grid-template-columns: 80px 1fr;
+            gap: var(--spacing-md);
+          }
+          
+          .product-image {
+            width: 80px;
+            height: 80px;
+          }
+          
+          .product-actions {
+            grid-column: 1 / -1;
+            justify-content: flex-end;
+            margin-top: var(--spacing-sm);
+          }
+        }
+        
         .product-image {
           width: 100px;
           height: 100px;
