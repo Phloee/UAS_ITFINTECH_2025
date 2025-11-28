@@ -139,6 +139,21 @@ export default function Navbar() {
           transform: rotate(45deg) translate(6px, 6px);
         }
 
+        .mobile-icons {
+          display: none;
+        }
+
+        .mobile-profile-icon {
+          font-size: 1.5rem;
+          padding: 0.5rem;
+          text-decoration: none;
+          transition: transform var(--transition-base);
+        }
+
+        .mobile-profile-icon:hover {
+          transform: scale(1.1);
+        }
+
         .hamburger.open span:nth-child(2) {
           opacity: 0;
         }
@@ -165,6 +180,15 @@ export default function Navbar() {
         @media (max-width: 768px) {
           .nav-content {
             padding: 0 var(--spacing-md);
+          }
+
+          .mobile-icons {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            position: absolute;
+            right: 60px;
+            z-index: 102;
           }
 
           .hamburger {
@@ -231,6 +255,14 @@ export default function Navbar() {
         <Link href="/" className="logo" onClick={handleLinkClick}>
           <span className="logo-text">scentfix.</span>
         </Link>
+
+        <div className="mobile-icons">
+          {user && !user.isAdmin && (
+            <Link href="/profile" className="mobile-profile-icon" onClick={handleLinkClick} title="Profile">
+              👤
+            </Link>
+          )}
+        </div>
 
         <button
           className={`hamburger ${mobileMenuOpen ? 'open' : ''}`}
