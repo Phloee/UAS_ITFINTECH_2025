@@ -250,26 +250,16 @@ export default function Home() {
             background-position: center center;
             background-repeat: no-repeat;
             min-height: 60vh;
-            animation: backgroundMove 30s ease-in-out infinite alternate;
+            transition: background-position 0.1s ease-out;
           }
 
-          @keyframes backgroundMove {
-            0% {
-              background-position: 40% center;
-            }
-            50% {
-              background-position: 60% center;
-            }
-            100% {
-              background-position: 40% center;
-            }
-          }
+
 
           @media (max-width: 768px) {
             .about-section {
-              background-attachment: scroll;
-              background-size: cover;
-              background-position: center center;
+              background-attachment: scroll !important;
+              background-size: cover !important;
+              background-position: center center !important;
             }
           }
 
@@ -292,6 +282,12 @@ export default function Home() {
           }
 
           .section-title {
+            color: #16a085 !important;
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+          }
+
+          .about-section .section-title {
             color: white !important;
           }
 
@@ -368,7 +364,13 @@ export default function Home() {
         </section>
 
         {/* About Us Section */}
-        <section id="about" className="about-section">
+        <section
+          id="about"
+          className="about-section"
+          style={{
+            backgroundPosition: `center ${50 + (scrollProgress * 20)}%`
+          }}
+        >
           <div className="about-container">
             <h2 className="section-title">About ScentFix</h2>
             <div className="about-content">
@@ -376,7 +378,8 @@ export default function Home() {
                 <AnimatedText
                   text="ScentFix was born from a simple idea: everyone deserves fresh, odor-free shoes. We understand the embarrassment and discomfort that smelly shoes can cause, and we are here to provide a simple, effective solution."
                   scrollProgress={scrollProgress}
-                  baseDelay={0}
+                  paragraphIndex={0}
+                  totalParagraphs={3}
                   as="h3"
                   className="animated-paragraph"
                 />
@@ -384,12 +387,16 @@ export default function Home() {
                 <AnimatedText
                   text="Our premium shoe deodorant patches are carefully crafted using natural ingredients that neutralize odors at their source. Unlike traditional sprays and powders, our patches provide long-lasting protection that keeps your shoes fresh all day long."
                   scrollProgress={scrollProgress}
+                  paragraphIndex={1}
+                  totalParagraphs={3}
                   className="animated-paragraph"
                 />
 
                 <AnimatedText
                   text="To make fresh, confident steps accessible to everyone through innovative, eco-friendly shoe care solutions. We believe that small details make a big difference in your daily confidence and comfort."
                   scrollProgress={scrollProgress}
+                  paragraphIndex={2}
+                  totalParagraphs={3}
                   className="animated-paragraph"
                 />
               </div>

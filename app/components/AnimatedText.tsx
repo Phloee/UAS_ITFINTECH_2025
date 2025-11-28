@@ -4,7 +4,8 @@
 interface AnimatedTextProps {
   text: string;
   scrollProgress: number;
-  baseDelay?: number;
+  paragraphIndex?: number;
+  totalParagraphs?: number;
   className?: string;
   as?: 'h3' | 'p';
 }
@@ -12,7 +13,8 @@ interface AnimatedTextProps {
 export default function AnimatedText({
   text,
   scrollProgress,
-  baseDelay = 0,
+  paragraphIndex = 0,
+  totalParagraphs = 1,
   className = '',
   as: Component = 'p'
 }: AnimatedTextProps) {
@@ -40,17 +42,22 @@ export default function AnimatedText({
         return (
           <span key={wordIndex} className="word-wrapper">
             {word.split('').map((char, charIndex) => {
-              // Calculate global character index across all text
+              // Calculate character position ACROSS ALL PARAGRAPHS for continuous animation
               const charsBeforeWord = words.slice(0, wordIndex).join('').length;
-              const globalCharIndex = charsBeforeWord + charIndex;
-              const totalChars = text.replace(/ /g, '').length;
+              const charIndexInParagraph = charsBeforeWord + charIndex;
+              const totalCharsInParagraph = text.replace(/ /g, '').length;
 
-              // Smooth scroll-based opacity (Tokopedia pattern)
-              const progress = globalCharIndex / totalChars;
-              const opacity = Math.max(0.2, Math.min(1, (safeScrollProgress - progress * 0.7) / 0.3));
+              // Calculate position as percentage across all paragraphs
+              const paragraphProgress = paragraphIndex / totalParagraphs;
+              const charProgressInParagraph = charIndexInParagraph / totalCharsInParagraph;
+              const globalProgress = paragraphProgress + (charProgressInParagraph / totalParagraphs);
+
+              // Smooth scroll-based opacity (continuous across paragraphs)
+              // Using 0.6 multiplier and 0.5 divisor for faster load as previously tested
+              const opacity = Math.max(0.2, Math.min(1, (safeScrollProgress - globalProgress * 0.6) / 0.5));
 
               // Color transition: from wordColor to white based on opacity
-              const isFullyVisible = opacity > 0.9;
+              const isFullyVisible = opacity > 0.85;
               const finalColor = isFullyVisible ? '#ffffff' : wordColor;
 
               return (
