@@ -101,8 +101,15 @@ export default function CheckoutPage() {
           toast.error('Payment failed');
           setProcessing(false);
         },
-        onClose: function () {
+        onClose: async function () {
           setProcessing(false);
+          try {
+            await ordersAPI.cancel(order._id || order.id);
+            toast.error('Payment cancelled');
+            router.push(`/orders/${order._id || order.id}`);
+          } catch (error) {
+            console.error('Failed to cancel order:', error);
+          }
         }
       });
     } catch (error: any) {

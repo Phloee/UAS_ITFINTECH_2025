@@ -119,6 +119,37 @@ router.post('/:id/payment', authenticateToken, async (req, res) => {
     }
 });
 
+// Cancel order (user initiated)
+router.post('/:id/cancel', authenticateToken, async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        if (order.userId.toString() !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
+        if (order.status !== 'pending') {
+            return res.status(400).json({ error: 'Cannot cancel non-pending order' });
+        }
+
+        order.status = 'cancelled';
+        order.paymentStatus = 'cancelled';
+        await order.save();
+
+        res.json({
+            message: 'Order cancelled successfully',
+            order
+        });
+    } catch (error) {
+        console.error('Cancel order error:', error);
+        res.status(500).json({ error: 'Failed to cancel order' });
+    }
+});
+
 
 // Check payment status manually (for localhost development)
 router.get('/:id/status', authenticateToken, async (req, res) => {

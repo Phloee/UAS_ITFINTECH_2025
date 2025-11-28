@@ -53,12 +53,8 @@ export default function OrderDetailPage() {
       setCheckingStatus(true);
     }
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/orders/${params.id}/status`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      const data = await response.json();
+      const response = await ordersAPI.checkStatus(params.id);
+      const data = response.data;
 
       // Update order with new status
       setOrder((prev: any) => ({

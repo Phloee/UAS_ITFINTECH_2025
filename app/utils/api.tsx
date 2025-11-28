@@ -66,7 +66,9 @@ export const orders = {
     getUserOrders: () => api.get('/orders'),
     getById: (id) => api.get(`/orders/${id}`),
     getAll: () => api.get('/orders'),
-    updateStatus: (id, status) => api.put(`/orders/${id}/status`, { status })
+    updateStatus: (id, status) => api.put(`/orders/${id}/status`, { status }),
+    checkStatus: (id) => api.get(`/orders/${id}/status`),
+    cancel: (id) => api.post(`/orders/${id}/cancel`)
 };
 
 // Reports API
