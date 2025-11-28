@@ -118,7 +118,7 @@ router.get('/orders', authenticateAdmin, async (req, res) => {
             }
         });
 
-        const totalOrders = await Order.countDocuments();
+        const totalOrders = await Order.countDocuments({ paymentStatus: 'paid' });
 
         res.json({
             totalOrders,
