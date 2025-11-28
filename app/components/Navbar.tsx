@@ -218,20 +218,29 @@ export default function Navbar() {
           }
 
           .nav-link {
-            padding: var(--spacing-lg) 0;
-            border-bottom: 1px solid var(--color-gray-100);
+            padding: var(--spacing-lg) var(--spacing-md);
+            border-bottom: 2px solid var(--color-gray-200);
             font-size: 1.125rem;
+            margin: var(--spacing-sm) 0;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-base);
+          }
+          
+          .nav-link:hover {
+            background: var(--color-gray-50);
+            padding-left: var(--spacing-lg);
           }
 
           .nav-links .btn {
-            margin-top: var(--spacing-md);
+            margin-top: var(--spacing-xl);
             text-align: center;
             width: 100%;
-            min-height: 52px;
+            min-height: 56px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.125rem;
+            font-weight: 600;
           }
 
           .logo-text {
