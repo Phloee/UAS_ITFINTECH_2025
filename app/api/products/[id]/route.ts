@@ -36,10 +36,16 @@ export async function PUT(
         await connectDB();
 
         const { id } = await params;
-        const body = await request.json();
-        console.log('Update request for product:', id, body);
 
-        const { name, description, price, stock } = body;
+        // Parse FormData instead of JSON
+        const formData = await request.formData();
+        console.log('Update request for product:', id);
+
+        const name = formData.get('name') as string;
+        const description = formData.get('description') as string;
+        const price = formData.get('price') as string;
+        const stock = formData.get('stock') as string;
+        const imageFile = formData.get('image') as File | null;
 
         const product = await Product.findById(id);
         if (!product) {
@@ -48,10 +54,18 @@ export async function PUT(
 
         // Build updates object
         const updates: any = {};
-        if (name !== undefined) updates.name = name;
-        if (description !== undefined) updates.description = description;
-        if (price !== undefined) updates.price = parseFloat(price);
-        if (stock !== undefined) updates.stock = parseInt(stock);
+        if (name) updates.name = name;
+        if (description) updates.description = description;
+        if (price) updates.price = parseFloat(price);
+        if (stock) updates.stock = parseInt(stock);
+
+        // Note: Image upload handling would require additional setup (e.g., file storage service)
+        // For now, we skip image updates. Image field remains unchanged unless you implement file storage.
+        if (imageFile && imageFile.size > 0) {
+            console.log('Image file received:', imageFile.name, 'Size:', imageFile.size);
+            // TODO: Implement image upload to storage service (e.g., Cloudinary, AWS S3)
+            // For now, we'll just log it and keep the existing image
+        }
 
         console.log('Applying updates:', updates);
 
