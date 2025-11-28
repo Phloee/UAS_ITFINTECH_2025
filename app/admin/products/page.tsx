@@ -173,19 +173,28 @@ export default function AdminProductsPage() {
         
         @media (max-width: 768px) {
           .product-row {
-            grid-template-columns: 80px 1fr;
+            grid-template-columns: 1fr;
             gap: var(--spacing-md);
+            padding: var(--spacing-md);
           }
           
           .product-image {
-            width: 80px;
-            height: 80px;
+            width: 100%;
+            height: 200px;
+            margin: 0 auto;
+          }
+          
+          .product-info {
+            text-align: left;
           }
           
           .product-actions {
-            grid-column: 1 / -1;
-            justify-content: flex-end;
-            margin-top: var(--spacing-sm);
+            width: 100%;
+            justify-content: stretch;
+          }
+          
+          .product-actions button {
+            flex: 1;
           }
         }
         
