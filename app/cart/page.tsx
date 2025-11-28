@@ -45,22 +45,64 @@ export default function CartPage() {
   };
 
   const updateQuantity = async (productId, newQuantity) => {
+    // If quantity would be 0 or less, remove the item instead
+    if (newQuantity <= 0) {
+      removeItem(productId);
+      return;
+    }
+
+    // Optimistic update - update UI immediately
+    setCart(prevCart => {
+      const updatedItems = prevCart.items.map(item => {
+        const itemProductId = item.productId?._id || item._id;
+        if (itemProductId === productId) {
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      });
+
+      const newTotal = updatedItems.reduce((sum, item) => {
+        const price = item.productId?.price || 0;
+        return sum + (price * item.quantity);
+      }, 0);
+
+      return { items: updatedItems, totalAmount: newTotal };
+    });
+
+    // Then sync with server in background
     try {
       await cartAPI.update({ productId, quantity: newQuantity });
-      await fetchCart();
-      toast.success('Cart updated');
+      // Silently sync - no need to show success toast for every update
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to update cart');
+      // If server update fails, revert to server state
+      toast.error('Failed to update cart');
+      fetchCart(); // Revert to actual server state
     }
   };
 
   const removeItem = async (productId) => {
+    // Optimistic update - remove from UI immediately
+    setCart(prevCart => {
+      const updatedItems = prevCart.items.filter(item => {
+        const itemProductId = item.productId?._id || item._id;
+        return itemProductId !== productId;
+      });
+
+      const newTotal = updatedItems.reduce((sum, item) => {
+        const price = item.productId?.price || 0;
+        return sum + (price * item.quantity);
+      }, 0);
+
+      return { items: updatedItems, totalAmount: newTotal };
+    });
+
+    // Then sync with server in background
     try {
       await cartAPI.remove(productId);
-      await fetchCart();
       toast.success('Item removed from cart');
     } catch (error) {
       toast.error('Failed to remove item');
+      fetchCart(); // Revert to actual server state
     }
   };
 
