@@ -9,7 +9,7 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const user = requireAuth(request);
+        const user = await requireAuth(request);
         await connectDB();
 
         const { id } = await params;
