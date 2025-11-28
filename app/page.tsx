@@ -12,9 +12,32 @@ import { products as productsAPI } from './utils/api';
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     fetchProducts();
+
+    // Scroll animation observer
+    const handleScroll = () => {
+      const aboutSection = document.getElementById('about');
+      if (aboutSection) {
+        const rect = aboutSection.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+        const sectionTop = rect.top;
+        
+        // Calculate progress (0 to 1) as section scrolls into view
+        let progress = 0;
+        if (sectionTop < windowHeight && sectionTop > -rect.height) {
+          progress = Math.min(1, Math.max(0, (windowHeight - sectionTop) / (windowHeight * 0.8)));
+        }
+        setScrollProgress(progress);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const fetchProducts = async () => {
