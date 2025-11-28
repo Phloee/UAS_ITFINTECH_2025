@@ -263,9 +263,15 @@ export default function AdminOrdersPage() {
                             <div key={order._id} className="table-row">
                                 <div className="order-number">{order.orderNumber}</div>
                                 <div className="customer-name">
-                                    {order.customerName || 'Customer'}
+                                    {order.userId?.name || 'Unknown Customer'}
                                 </div>
-                                <div>{order.items?.length || 0} items</div>
+                                <div>
+                                    {order.items?.map((item, idx) => (
+                                        <div key={idx} style={{ fontSize: '0.875rem' }}>
+                                            {item.productId?.name || 'Product'} x{item.quantity}
+                                        </div>
+                                    ))}
+                                </div>
                                 <div>Rp {order.totalAmount?.toLocaleString('id-ID')}</div>
                                 <div>
                                     <span style={{

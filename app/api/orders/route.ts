@@ -10,10 +10,11 @@ export async function GET(request: NextRequest) {
         await connectDB();
 
         if (user.isAdmin) {
-            // Admin: get all orders
+            // Admin: get all orders with user and product details
             const orders = await Order.find({})
                 .sort({ createdAt: -1 })
-                .populate('userId', 'name email');
+                .populate('userId', 'name email phone')
+                .populate('items.productId', 'name price image');
             return NextResponse.json(orders);
         } else {
             // User: get own orders

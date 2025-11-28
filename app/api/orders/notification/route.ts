@@ -51,6 +51,8 @@ export async function POST(request: NextRequest) {
                     const user = await User.findById(order.userId);
                     if (user) {
                         try {
+                            console.log('📱 Attempting to send WhatsApp notification to:', user.phone);
+
                             // Inline WhatsApp logic to avoid require issues
                             const axios = require('axios');
                             const updatedOrderObj = order.toObject();
@@ -72,7 +74,7 @@ We are processing your order now. You will receive another update when it ships.
 Thank you for shopping with ScentFix!
                             `.trim();
 
-                            await axios.post('https://api.fonnte.com/send', {
+                            const response = await axios.post('https://api.fonnte.com/send', {
                                 target: user.phone,
                                 message: message,
                             }, {
@@ -80,10 +82,18 @@ Thank you for shopping with ScentFix!
                                     'Authorization': process.env.FONNTE_TOKEN
                                 }
                             });
-                            console.log('📱 Payment confirmation sent to:', user.phone);
+
+                            console.log('📱 WhatsApp API Response:', response.data);
+                            console.log('✅ Payment confirmation sent successfully to:', user.phone);
                         } catch (err) {
-                            console.error('WhatsApp notification error:', err);
+                            console.error('❌ WhatsApp notification error:');
+                            console.error('Error details:', err.response?.data || err.message);
+                            console.error('User phone:', user.phone);
+                            console.error('FONNTE_TOKEN present:', !!process.env.FONNTE_TOKEN);
+                            // Don't fail the webhook if WhatsApp fails
                         }
+                    } else {
+                        console.error('❌ User not found for order:', order.userId);
                     }
                 }
             }
