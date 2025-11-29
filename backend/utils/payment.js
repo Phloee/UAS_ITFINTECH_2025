@@ -57,7 +57,9 @@ class MidtransService {
                 expiry: {
                     unit: 'minutes',
                     duration: 60
-                }
+                },
+                // Automatically set the webhook URL so you don't have to configure it in the dashboard
+                notification_url: `${process.env.NEXT_URL}/api/orders/notification`
             };
 
             const response = await axios.post(this.snapUrl, payload, {
