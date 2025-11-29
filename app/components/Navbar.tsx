@@ -10,6 +10,20 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    // Check on mount
+    checkMobile();
+
+    // Check on resize
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (user && !user.isAdmin) {
@@ -310,12 +324,72 @@ export default function Navbar() {
 
           {user && !user.isAdmin && (
             <>
-              <Link href="/products" className="nav-link mobile-menu-item" onClick={handleLinkClick}>Products</Link>
-              <Link href="/cart" className="nav-link mobile-menu-item" onClick={handleLinkClick}>
+              <Link
+                href="/products"
+                className="nav-link mobile-menu-item"
+                onClick={handleLinkClick}
+                style={isMobile ? {
+                  padding: '1rem 1.5rem',
+                  margin: '0.75rem 0',
+                  background: 'white',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  fontWeight: '500',
+                  display: 'block'
+                } : {}}
+              >
+                Products
+              </Link>
+              <Link
+                href="/cart"
+                className="nav-link mobile-menu-item"
+                onClick={handleLinkClick}
+                style={isMobile ? {
+                  padding: '1rem 1.5rem',
+                  margin: '0.75rem 0',
+                  background: 'white',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  fontWeight: '500',
+                  display: 'block'
+                } : {}}
+              >
                 🛒 Cart {cartCount > 0 && `(${cartCount})`}
               </Link>
-              <Link href="/profile" className="nav-link mobile-menu-item" onClick={handleLinkClick}>Orders</Link>
-              <Link href="/profile" className="nav-link mobile-menu-item" onClick={handleLinkClick}>
+              <Link
+                href="/profile"
+                className="nav-link mobile-menu-item"
+                onClick={handleLinkClick}
+                style={isMobile ? {
+                  padding: '1rem 1.5rem',
+                  margin: '0.75rem 0',
+                  background: 'white',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  fontWeight: '500',
+                  display: 'block'
+                } : {}}
+              >
+                Orders
+              </Link>
+              <Link
+                href="/profile"
+                className="nav-link mobile-menu-item"
+                onClick={handleLinkClick}
+                style={isMobile ? {
+                  padding: '1rem 1.5rem',
+                  margin: '0.75rem 0',
+                  background: 'white',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  fontWeight: '500',
+                  display: 'block'
+                } : {}}
+              >
                 👤 Profile
               </Link>
               <button onClick={handleLogout} className="btn btn-outline btn-sm">Logout</button>
