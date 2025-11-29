@@ -32,6 +32,9 @@ class MidtransService {
         try {
             const auth = Buffer.from(this.serverKey + ':').toString('base64');
 
+            // Normalize NEXT_URL by removing trailing slash to prevent double slashes
+            const baseUrl = process.env.NEXT_URL?.replace(/\/$/, '') || '';
+
             const payload = {
                 transaction_details: {
                     order_id: order.orderNumber,
@@ -50,16 +53,16 @@ class MidtransService {
                     name: item.name
                 })),
                 callbacks: {
-                    finish: `${process.env.NEXT_URL}/orders/${order.id}`,
-                    error: `${process.env.NEXT_URL}/checkout?error=payment_failed`,
-                    pending: `${process.env.NEXT_URL}/orders/${order.id}`
+                    finish: `${baseUrl}/orders/${order.id}`,
+                    error: `${baseUrl}/checkout?error=payment_failed`,
+                    pending: `${baseUrl}/orders/${order.id}`
                 },
                 expiry: {
                     unit: 'minutes',
                     duration: 60
                 },
                 // Automatically set the webhook URL so you don't have to configure it in the dashboard
-                notification_url: `${process.env.NEXT_URL}/api/orders/notification`
+                notification_url: `${baseUrl}/api/orders/notification`
             };
 
             const response = await axios.post(this.snapUrl, payload, {

@@ -11,149 +11,210 @@ import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 export default function CheckoutPage() {
-  const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
-  const [cart, setCart] = useState({ items: [], totalAmount: 0 });
-  const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState(false);
-  const [snapLoaded, setSnapLoaded] = useState(false);
+    const router = useRouter();
+    const { user, loading: authLoading } = useAuth();
+    const [cart, setCart] = useState({ items: [], totalAmount: 0 });
+    const [loading, setLoading] = useState(true);
+    const [processing, setProcessing] = useState(false);
+    const [snapLoaded, setSnapLoaded] = useState(false);
+    const [currentOrderId, setCurrentOrderId] = useState(null);
 
-  useEffect(() => {
-    // Check if Snap is already loaded globally
-    if (typeof window !== 'undefined' && (window as any).snap) {
-      console.log('Midtrans Snap already loaded');
-      setSnapLoaded(true);
-    }
-
-    // Fallback: If script takes too long (e.g. 3s), allow user to retry or force enable
-    const timer = setTimeout(() => {
-      if (typeof window !== 'undefined' && (window as any).snap) {
-        setSnapLoaded(true);
-      }
-    }, 3000);
-
-    // Debug client key and production mode
-    console.log('Midtrans Client Key:', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY ? 'Present' : 'Missing');
-    console.log('Production Mode:', process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION);
-
-    if (authLoading) return;
-
-    if (!user || user.isAdmin) {
-      toast.error('Please login to checkout');
-      router.push('/auth/login');
-      return;
-    }
-    fetchCart();
-
-    return () => clearTimeout(timer);
-  }, [user, authLoading]);
-
-  const fetchCart = async () => {
-    try {
-      const response = await cartAPI.get();
-      if (response.data.items.length === 0) {
-        toast.error('Your cart is empty');
-        router.push('/cart');
-        return;
-      }
-      const items = response.data.items || [];
-      // Calculate total using populated product data
-      const totalAmount = items.reduce((sum, item) => {
-        const price = item.productId?.price || 0;
-        return sum + (price * item.quantity);
-      }, 0);
-      setCart({ items, totalAmount });
-    } catch (error) {
-      toast.error('Failed to fetch cart');
-      router.push('/cart');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCheckout = async () => {
-    if (!snapLoaded) {
-      toast.error('Payment system is loading, please wait...');
-      return;
-    }
-
-    setProcessing(true);
-    try {
-      // Create order
-      const orderResponse = await ordersAPI.create({});
-      const order = orderResponse.data.order;
-
-      // Initiate payment
-      const paymentResponse = await ordersAPI.initiatePayment(order._id || order.id);
-      const { token } = paymentResponse.data;
-
-      // Open Midtrans Snap
-      (window as any).snap.pay(token, {
-        onSuccess: function (result: any) {
-          toast.success('Payment successful!');
-          router.push(`/orders/${order._id || order.id}`);
-        },
-        onPending: function (result: any) {
-          toast.info('Payment pending');
-          router.push(`/orders/${order._id || order.id}`);
-        },
-        onError: function (result: any) {
-          toast.error('Payment failed');
-          setProcessing(false);
-        },
-        onClose: async function () {
-          setProcessing(false);
-          const toastId = toast.loading('Cancelling order...');
-          try {
-            await ordersAPI.cancel(order._id || order.id);
-            toast.success('Order cancelled', { id: toastId });
-          } catch (error) {
-            console.error('Failed to cancel order:', error);
-            toast.error('Order pending', { id: toastId });
-          } finally {
-            router.push(`/orders/${order._id || order.id}`);
-          }
+    useEffect(() => {
+        // Check if Snap is already loaded globally
+        if (typeof window !== 'undefined' && (window as any).snap) {
+            console.log('Midtrans Snap already loaded');
+            setSnapLoaded(true);
         }
-      });
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Checkout failed');
-      setProcessing(false);
+
+        // Fallback: If script takes too long (e.g. 3s), allow user to retry or force enable
+        const timer = setTimeout(() => {
+            if (typeof window !== 'undefined' && (window as any).snap) {
+                setSnapLoaded(true);
+            }
+        }, 3000);
+
+        // Debug client key and production mode
+        console.log('Midtrans Client Key:', process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY ? 'Present' : 'Missing');
+        console.log('Production Mode:', process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION);
+
+        if (authLoading) return;
+
+        if (!user || user.isAdmin) {
+            toast.error('Please login to checkout');
+            router.push('/auth/login');
+            return;
+        }
+        fetchCart();
+
+        return () => clearTimeout(timer);
+    }, [user, authLoading]);
+
+    // Auto-check payment status when returning from external payment apps (like Gojek)
+    useEffect(() => {
+        const handleVisibilityChange = async () => {
+            if (document.visibilityState === 'visible' && currentOrderId) {
+                console.log('📱 Page regained focus, checking payment status...');
+                try {
+                    const statusResponse = await ordersAPI.getById(currentOrderId);
+                    const order = statusResponse.data;
+
+                    if (order.paymentStatus === 'paid') {
+                        setCurrentOrderId(null);
+                        toast.success('Payment confirmed! Redirecting...');
+                        router.push(`/orders/${currentOrderId}`);
+                    }
+                } catch (error) {
+                    console.error('Failed to check order status:', error);
+                }
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }, [currentOrderId, router]);
+
+    const fetchCart = async () => {
+        try {
+            const response = await cartAPI.get();
+            if (response.data.items.length === 0) {
+                toast.error('Your cart is empty');
+                router.push('/cart');
+                return;
+            }
+            const items = response.data.items || [];
+            // Calculate total using populated product data
+            const totalAmount = items.reduce((sum, item) => {
+                const price = item.productId?.price || 0;
+                return sum + (price * item.quantity);
+            }, 0);
+            setCart({ items, totalAmount });
+        } catch (error) {
+            toast.error('Failed to fetch cart');
+            router.push('/cart');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCheckout = async () => {
+        if (!snapLoaded) {
+            toast.error('Payment system not ready. Please refresh the page.');
+            return;
+        }
+
+        setProcessing(true);
+        try {
+            // Create order
+            const orderResponse = await ordersAPI.create({});
+            const order = orderResponse.data.order;
+            const orderId = order._id || order.id;
+
+            // Track this order for auto status checking
+            setCurrentOrderId(orderId);
+
+            // Initiate payment
+            const paymentResponse = await ordersAPI.initiatePayment(orderId);
+            const { token } = paymentResponse.data;
+
+            // Open Midtrans Snap
+            (window as any).snap.pay(token, {
+                onSuccess: function (result: any) {
+                    setCurrentOrderId(null);
+                    toast.success('Payment successful!');
+                    router.push(`/orders/${orderId}`);
+                },
+                onPending: function (result: any) {
+                    toast.info('Payment pending');
+                    router.push(`/orders/${orderId}`);
+                },
+                onError: function (result: any) {
+                    setCurrentOrderId(null);
+                    toast.error('Payment failed');
+                    setProcessing(false);
+                },
+                onClose: async function () {
+                    // Wait a moment and check payment status (for external payment apps)
+                    console.log('⏸️ Snap closed, checking payment status...');
+
+                    setTimeout(async () => {
+                        try {
+                            const statusResponse = await ordersAPI.getById(orderId);
+                            const currentOrder = statusResponse.data;
+
+                            if (currentOrder.paymentStatus === 'paid') {
+                                setCurrentOrderId(null);
+                                toast.success('Payment confirmed!');
+                                router.push(`/orders/${orderId}`);
+                                return;
+                            }
+                        } catch (error) {
+                            console.error('Failed to check order status:', error);
+                        }
+
+                        // Payment not completed - ask user
+                        setProcessing(false);
+                        const shouldCancel = confirm('Payment window closed. Would you like to cancel this order?');
+
+                        if (shouldCancel) {
+                            const toastId = toast.loading('Cancelling order...');
+                            try {
+                                await ordersAPI.cancel(orderId);
+                                setCurrentOrderId(null);
+                                toast.success('Order cancelled', { id: toastId });
+                            } catch (error) {
+                                console.error('Failed to cancel order:', error);
+                                toast.error('Failed to cancel', { id: toastId });
+                            } finally {
+                                router.push(`/orders/${orderId}`);
+                            }
+                        } else {
+                            // Keep polling active in case they paid in external app
+                            setCurrentOrderId(null);
+                            router.push(`/orders/${orderId}`);
+                        }
+                    }, 2000);
+                }
+            });
+        } catch (error: any) {
+            setCurrentOrderId(null);
+            toast.error(error.response?.data?.error || 'Checkout failed');
+            setProcessing(false);
+        }
+    };
+
+    if (authLoading || loading || !user) {
+        return (
+            <>
+                <Navbar />
+                <div style={{ textAlign: 'center', padding: '5rem' }}>
+                    <div className="spinner" style={{ margin: '0 auto' }}></div>
+                </div>
+            </>
+        );
     }
-  };
 
-  if (authLoading || loading || !user) {
     return (
-      <>
-        <Navbar />
-        <div style={{ textAlign: 'center', padding: '5rem' }}>
-          <div className="spinner" style={{ margin: '0 auto' }}></div>
-        </div>
-      </>
-    );
-  }
+        <>
+            <Script
+                src={process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true'
+                    ? "https://app.midtrans.com/snap/snap.js"
+                    : "https://app.sandbox.midtrans.com/snap/snap.js"}
+                data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+                strategy="lazyOnload"
+                onLoad={() => {
+                    console.log('Midtrans Snap script loaded successfully');
+                    setSnapLoaded(true);
+                }}
+                onError={(e) => {
+                    console.error('Midtrans Snap script failed to load', e);
+                    toast.error('Failed to load payment system. Please check your connection.');
+                }}
+            />
 
-  return (
-    <>
-      <Script
-        src={process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true'
-          ? "https://app.midtrans.com/snap/snap.js"
-          : "https://app.sandbox.midtrans.com/snap/snap.js"}
-        data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
-        strategy="lazyOnload"
-        onLoad={() => {
-          console.log('Midtrans Snap script loaded successfully');
-          setSnapLoaded(true);
-        }}
-        onError={(e) => {
-          console.error('Midtrans Snap script failed to load', e);
-          toast.error('Failed to load payment system. Please check your connection.');
-        }}
-      />
+            <Navbar />
 
-      <Navbar />
-
-      <main className="checkout-page">
-        <style jsx>{`
+            <main className="checkout-page">
+                <style jsx>{`
           .checkout-page {
             max-width: 800px;
             margin: 0 auto;
@@ -309,87 +370,87 @@ export default function CheckoutPage() {
           }
         `}</style>
 
-        <h1 className="page-title">Checkout</h1>
+                <h1 className="page-title">Checkout</h1>
 
-        <div className="checkout-section">
-          <h2 className="section-title">Order Summary</h2>
+                <div className="checkout-section">
+                    <h2 className="section-title">Order Summary</h2>
 
-          {cart.items.map((item) => {
-            // Access populated product data safely
-            const product = item.productId || {};
-            const price = product.price || 0;
-            const name = product.name || 'Unknown Product';
-            const productId = product._id || item._id;
+                    {cart.items.map((item) => {
+                        // Access populated product data safely
+                        const product = item.productId || {};
+                        const price = product.price || 0;
+                        const name = product.name || 'Unknown Product';
+                        const productId = product._id || item._id;
 
-            return (
-              <div key={productId} className="order-item">
-                <div className="item-info">
-                  <div className="item-name">{name}</div>
-                  <div className="item-quantity">Quantity: {item.quantity}</div>
+                        return (
+                            <div key={productId} className="order-item">
+                                <div className="item-info">
+                                    <div className="item-name">{name}</div>
+                                    <div className="item-quantity">Quantity: {item.quantity}</div>
+                                </div>
+                                <div className="item-price">
+                                    Rp {(price * item.quantity).toLocaleString('id-ID')}
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    <div className="order-summary">
+                        <div className="summary-row">
+                            <span>Subtotal:</span>
+                            <span>Rp {cart.totalAmount.toLocaleString('id-ID')}</span>
+                        </div>
+                        <div className="summary-row">
+                            <span>Shipping:</span>
+                            <span>FREE</span>
+                        </div>
+                        <div className="summary-row summary-total">
+                            <span>Total:</span>
+                            <span className="total-amount">Rp {cart.totalAmount.toLocaleString('id-ID')}</span>
+                        </div>
+                    </div>
                 </div>
-                <div className="item-price">
-                  Rp {(price * item.quantity).toLocaleString('id-ID')}
+
+                <div className="checkout-section">
+                    <h2 className="section-title">Shipping Information</h2>
+
+                    <div className="shipping-info">
+                        <div className="shipping-badge">FREE SHIPPING</div>
+                        <p><strong>Delivery Time:</strong> 3-5 business days</p>
+                        <p><strong>Status Updates:</strong> You'll receive WhatsApp notifications for order updates</p>
+                    </div>
                 </div>
-              </div>
-            );
-          })}
 
-          <div className="order-summary">
-            <div className="summary-row">
-              <span>Subtotal:</span>
-              <span>Rp {cart.totalAmount.toLocaleString('id-ID')}</span>
-            </div>
-            <div className="summary-row">
-              <span>Shipping:</span>
-              <span>FREE</span>
-            </div>
-            <div className="summary-row summary-total">
-              <span>Total:</span>
-              <span className="total-amount">Rp {cart.totalAmount.toLocaleString('id-ID')}</span>
-            </div>
-          </div>
-        </div>
+                <div className="checkout-section">
+                    <h2 className="section-title">Payment Method</h2>
 
-        <div className="checkout-section">
-          <h2 className="section-title">Shipping Information</h2>
+                    <div className="payment-info">
+                        <strong>Secure Payment via Midtrans</strong>
+                        <p>You'll be redirected to our secure payment partner to complete your purchase. We accept credit cards, bank transfers, and e-wallets.</p>
+                    </div>
 
-          <div className="shipping-info">
-            <div className="shipping-badge">FREE SHIPPING</div>
-            <p><strong>Delivery Time:</strong> 3-5 business days</p>
-            <p><strong>Status Updates:</strong> You'll receive WhatsApp notifications for order updates</p>
-          </div>
-        </div>
+                    <div className="checkout-actions">
+                        <button
+                            className="btn btn-secondary"
+                            onClick={() => router.push('/cart')}
+                            disabled={processing}
+                            style={{ flex: 1 }}
+                        >
+                            Back to Cart
+                        </button>
+                        <button
+                            className="btn btn-primary btn-lg"
+                            onClick={handleCheckout}
+                            disabled={processing || !snapLoaded}
+                            style={{ flex: 2 }}
+                        >
+                            {processing ? 'Processing...' : !snapLoaded ? 'Loading Payment...' : 'Pay Now'}
+                        </button>
+                    </div>
+                </div>
+            </main>
 
-        <div className="checkout-section">
-          <h2 className="section-title">Payment Method</h2>
-
-          <div className="payment-info">
-            <strong>Secure Payment via Midtrans</strong>
-            <p>You'll be redirected to our secure payment partner to complete your purchase. We accept credit cards, bank transfers, and e-wallets.</p>
-          </div>
-
-          <div className="checkout-actions">
-            <button
-              className="btn btn-secondary"
-              onClick={() => router.push('/cart')}
-              disabled={processing}
-              style={{ flex: 1 }}
-            >
-              Back to Cart
-            </button>
-            <button
-              className="btn btn-primary btn-lg"
-              onClick={handleCheckout}
-              disabled={processing || !snapLoaded}
-              style={{ flex: 2 }}
-            >
-              {processing ? 'Processing...' : !snapLoaded ? 'Loading Payment...' : 'Pay Now'}
-            </button>
-          </div>
-        </div>
-      </main>
-
-      <Footer />
-    </>
-  );
+            <Footer />
+        </>
+    );
 }
