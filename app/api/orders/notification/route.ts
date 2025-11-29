@@ -53,7 +53,6 @@ export async function POST(request: NextRequest) {
                         try {
                             console.log('📱 Attempting to send WhatsApp notification to:', user.phone);
 
-                            // Inline WhatsApp logic to avoid require issues
                             const axios = require('axios');
                             const updatedOrderObj = order.toObject();
                             updatedOrderObj.status = newStatus;
@@ -77,6 +76,7 @@ Thank you for shopping with ScentFix!
                             const response = await axios.post('https://api.fonnte.com/send', {
                                 target: user.phone,
                                 message: message,
+                                countryCode: '62' // Added countryCode as per working example
                             }, {
                                 headers: {
                                     'Authorization': process.env.FONNTE_TOKEN
@@ -85,7 +85,7 @@ Thank you for shopping with ScentFix!
 
                             console.log('📱 WhatsApp API Response:', response.data);
                             console.log('✅ Payment confirmation sent successfully to:', user.phone);
-                        } catch (err) {
+                        } catch (err: any) {
                             console.error('❌ WhatsApp notification error:');
                             console.error('Error details:', err.response?.data || err.message);
                             console.error('User phone:', user.phone);
