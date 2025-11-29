@@ -316,8 +316,40 @@ export default function Navbar() {
         <div className={`nav-links ${mobileMenuOpen ? 'open' : ''}`}>
           {!user && (
             <>
-              <Link href="/products" className="nav-link" onClick={handleLinkClick}>Products</Link>
-              <Link href="/auth/login" className="nav-link" onClick={handleLinkClick}>Login</Link>
+              <Link
+                href="/products"
+                className="nav-link mobile-menu-item"
+                onClick={handleLinkClick}
+                style={isMobile ? {
+                  padding: '1rem 1.5rem',
+                  margin: '0.75rem 0',
+                  background: 'white',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  fontWeight: '500',
+                  display: 'block'
+                } : {}}
+              >
+                Products
+              </Link>
+              <Link
+                href="/auth/login"
+                className="nav-link mobile-menu-item"
+                onClick={handleLinkClick}
+                style={isMobile ? {
+                  padding: '1rem 1.5rem',
+                  margin: '0.75rem 0',
+                  background: 'white',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  fontWeight: '500',
+                  display: 'block'
+                } : {}}
+              >
+                Login
+              </Link>
               <Link href="/auth/register" className="btn btn-primary btn-sm" onClick={handleLinkClick}>Sign Up</Link>
             </>
           )}
