@@ -7,9 +7,6 @@ import FloatingCart from './components/FloatingCart';
 export const metadata = {
     title: 'ScentFix - Premium Shoe Deodorant Patches',
     description: 'Fresh, odor-free shoes with ScentFix premium deodorant patches',
-    icons: {
-        icon: '/assets/favicon.png',
-    },
 };
 
 export default function RootLayout({ children }) {
